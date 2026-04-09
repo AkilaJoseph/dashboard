@@ -8,6 +8,7 @@ class Clearance extends Model
 {
     protected $fillable = [
         'user_id',
+        'clearance_type',
         'academic_year',
         'semester',
         'status',

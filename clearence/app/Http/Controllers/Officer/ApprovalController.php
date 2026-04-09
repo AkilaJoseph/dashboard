@@ -10,15 +10,18 @@ use Illuminate\Support\Facades\Auth;
 
 class ApprovalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $officer = Auth::user();
 
-        // Get all approval requests for officer's department
-        $approvals = ClearanceApproval::where('department_id', $officer->department_id)
-            ->with(['clearance.user', 'department'])
-            ->latest()
-            ->paginate(15);
+        $query = ClearanceApproval::where('department_id', $officer->department_id)
+            ->with(['clearance.user', 'department']);
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $approvals = $query->latest()->paginate(15);
 
         return view('officer.approvals.index', compact('approvals'));
     }

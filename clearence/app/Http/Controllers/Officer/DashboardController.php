@@ -19,7 +19,8 @@ class DashboardController extends Controller
             ->get();
 
         $stats = [
-            'pending' => ClearanceApproval::where('department_id', $officer->department_id)->where('status', 'pending')->count(),
+            'total'    => ClearanceApproval::where('department_id', $officer->department_id)->count(),
+            'pending'  => ClearanceApproval::where('department_id', $officer->department_id)->where('status', 'pending')->count(),
             'approved' => ClearanceApproval::where('department_id', $officer->department_id)->where('status', 'approved')->count(),
             'rejected' => ClearanceApproval::where('department_id', $officer->department_id)->where('status', 'rejected')->count(),
         ];

@@ -13,13 +13,14 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            'total_users' => User::count(),
-            'total_students' => User::where('role', 'student')->count(),
-            'total_officers' => User::where('role', 'officer')->count(),
-            'total_departments' => Department::count(),
-            'total_clearances' => Clearance::count(),
-            'pending_clearances' => Clearance::where('status', 'pending')->count(),
-            'approved_clearances' => Clearance::where('status', 'approved')->count(),
+            'total_users'           => User::count(),
+            'total_students'        => User::where('role', 'student')->count(),
+            'total_officers'        => User::where('role', 'officer')->count(),
+            'total_departments'     => Department::count(),
+            'total_clearances'      => Clearance::count(),
+            'pending_clearances'    => Clearance::where('status', 'pending')->count(),
+            'inprogress_clearances' => Clearance::where('status', 'in_progress')->count(),
+            'approved_clearances'   => Clearance::where('status', 'approved')->count(),
         ];
 
         $recent_clearances = Clearance::with('user')->latest()->take(10)->get();

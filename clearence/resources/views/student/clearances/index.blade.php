@@ -1,66 +1,121 @@
 @extends('layouts.app')
 
 @section('title', 'My Clearances')
+@section('page-title', 'My Clearance Requests')
+@section('page-subtitle', 'View and track all your submitted clearance requests')
 
 @section('content')
-<div class="px-4 sm:px-0">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold text-gray-900">My Clearance Requests</h1>
-        <a href="{{ route('student.clearances.create') }}"
-           class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            Submit New Request
-        </a>
+<style>
+.cl-row{
+    display:grid;grid-template-columns:1fr 90px 120px 90px 90px;
+    align-items:center;gap:12px;
+    padding:14px 20px;border-radius:12px;
+    border:1px solid rgba(16,185,129,0.12);
+    background:rgba(16,185,129,0.02);
+    transition:all 0.3s;margin-bottom:8px;
+}
+.cl-row:hover{
+    border-color:rgba(16,185,129,0.35);
+    background:rgba(16,185,129,0.06);
+    box-shadow:0 0 20px rgba(16,185,129,0.1);
+}
+@media(max-width:640px){
+    .cl-row{grid-template-columns:1fr 80px;grid-template-rows:auto auto;}
+    .cl-row .cl-hide{display:none;}
+}
+</style>
+
+<div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:20px;">
+    <a href="{{ route('student.clearances.create') }}" class="btn-glow" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        New Clearance Request
+    </a>
+</div>
+
+<div class="glow-card" style="padding:0;overflow:hidden;">
+
+    @if($clearances->isEmpty())
+    <div style="text-align:center;padding:64px 24px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+            <svg style="width:28px;height:28px;" fill="none" stroke="rgba(16,185,129,0.5)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <p style="color:rgba(160,200,175,0.5);font-size:14px;margin-bottom:16px;">No clearance requests found.</p>
+        <a href="{{ route('student.clearances.create') }}" style="color:#34d399;font-size:12px;font-weight:700;text-decoration:none;letter-spacing:0.05em;">SUBMIT YOUR FIRST REQUEST &rarr;</a>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-        @if($clearances->isEmpty())
-            <div class="text-center py-12">
-                <p class="text-gray-500">No clearance requests yet.</p>
-                <a href="{{ route('student.clearances.create') }}" class="text-indigo-600 hover:text-indigo-900 mt-2 inline-block">
-                    Submit your first clearance request
-                </a>
-            </div>
-        @else
-            <ul class="divide-y divide-gray-200">
-                @foreach($clearances as $clearance)
-                    <li>
-                        <a href="{{ route('student.clearances.show', $clearance) }}" class="block hover:bg-gray-50">
-                            <div class="px-4 py-4 sm:px-6">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium text-indigo-600 truncate">
-                                            {{ $clearance->academic_year }} - {{ $clearance->semester }}
-                                        </p>
-                                        <p class="mt-2 text-sm text-gray-500">
-                                            Submitted: {{ $clearance->submitted_at->format('M d, Y') }}
-                                        </p>
-                                    </div>
-                                    <div class="ml-2 flex-shrink-0 flex">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            @if($clearance->status === 'approved') bg-green-100 text-green-800
-                                            @elseif($clearance->status === 'rejected') bg-red-100 text-red-800
-                                            @elseif($clearance->status === 'in_progress') bg-yellow-100 text-yellow-800
-                                            @else bg-gray-100 text-gray-800
-                                            @endif">
-                                            {{ ucfirst(str_replace('_', ' ', $clearance->status)) }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="text-sm text-gray-700">
-                                        @php
-                                            $approved = $clearance->approvals->where('status', 'approved')->count();
-                                            $total = $clearance->approvals->count();
-                                        @endphp
-                                        Progress: {{ $approved }} / {{ $total }} departments approved
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
+    @else
+
+    <!-- Table Header -->
+    <div style="padding:12px 20px 10px;border-bottom:1px solid rgba(16,185,129,0.1);">
+        <div class="cl-row" style="background:transparent;border:none;margin:0;padding:0 0 4px;">
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Academic Year / Semester</span>
+            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Type</span>
+            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Progress</span>
+            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Status</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Action</span>
+        </div>
     </div>
+
+    <div style="padding:12px 20px 20px;">
+        @foreach($clearances as $i => $clearance)
+        @php
+            $approved = $clearance->approvals->where('status','approved')->count();
+            $total    = $clearance->approvals->count();
+            $pct      = $total > 0 ? round(($approved/$total)*100) : 0;
+        @endphp
+        <div class="cl-row">
+            <!-- Year/Semester -->
+            <div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                    <span style="font-size:13px;font-weight:700;color:#e2e8f0;">{{ $clearance->academic_year }}</span>
+                    <span style="font-size:10px;color:rgba(160,200,175,0.4);">&mdash;</span>
+                    <span style="font-size:12px;color:rgba(160,200,175,0.6);">{{ $clearance->semester }} Sem</span>
+                </div>
+                <p style="font-size:10px;color:rgba(160,200,175,0.35);font-family:monospace;">{{ $clearance->submitted_at->format('d M Y') }}</p>
+            </div>
+
+            <!-- Type -->
+            <div class="cl-hide">
+                <span style="font-size:10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:rgba(160,200,175,0.6);padding:3px 10px;border-radius:999px;text-transform:capitalize;white-space:nowrap;">{{ $clearance->clearance_type }}</span>
+            </div>
+
+            <!-- Progress -->
+            <div class="cl-hide">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;background:rgba(16,185,129,0.08);border-radius:999px;height:4px;overflow:hidden;">
+                        <div style="height:4px;border-radius:999px;width:{{ $pct }}%;background:{{ $pct===100 ? 'linear-gradient(90deg,#10b981,#34d399)' : 'linear-gradient(90deg,#f59e0b,#fbbf24)' }};transition:width 1s ease;"></div>
+                    </div>
+                    <span style="font-size:10px;color:rgba(160,200,175,0.45);font-family:monospace;white-space:nowrap;">{{ $approved }}/{{ $total }}</span>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="cl-hide">
+                @if($clearance->status==='approved')
+                <span class="badge-approved">Approved</span>
+                @elseif($clearance->status==='rejected')
+                <span class="badge-rejected">Rejected</span>
+                @elseif($clearance->status==='in_progress')
+                <span class="badge-progress">In Progress</span>
+                @else
+                <span class="badge-pending">Pending</span>
+                @endif
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <a href="{{ route('student.clearances.show', $clearance) }}"
+                   style="font-size:11px;font-weight:700;color:#34d399;text-decoration:none;letter-spacing:0.04em;border:1px solid rgba(16,185,129,0.3);padding:4px 12px;border-radius:6px;transition:all 0.2s;"
+                   onmouseover="this.style.background='rgba(16,185,129,0.1)'" onmouseout="this.style.background='transparent'">VIEW</a>
+                @if($clearance->status === 'approved')
+                <a href="{{ route('student.clearances.certificate', $clearance) }}"
+                   style="font-size:11px;font-weight:700;color:#fbbf24;text-decoration:none;letter-spacing:0.04em;border:1px solid rgba(245,158,11,0.3);padding:4px 10px;border-radius:6px;transition:all 0.2s;"
+                   onmouseover="this.style.background='rgba(245,158,11,0.1)'" onmouseout="this.style.background='transparent'">CERT</a>
+                @endif
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @endif
 </div>
 @endsection

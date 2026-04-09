@@ -30,19 +30,21 @@ class ClearanceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'academic_year' => 'required|string',
-            'semester' => 'required|string',
-            'reason' => 'nullable|string',
+            'academic_year'  => 'required|string',
+            'semester'       => 'required|string',
+            'clearance_type' => 'required|in:graduation,semester,withdrawal,transfer',
+            'reason'         => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request) {
             // Create clearance
             $clearance = Auth::user()->clearances()->create([
-                'academic_year' => $request->academic_year,
-                'semester' => $request->semester,
-                'reason' => $request->reason,
-                'status' => 'pending',
-                'submitted_at' => now(),
+                'clearance_type' => $request->clearance_type,
+                'academic_year'  => $request->academic_year,
+                'semester'       => $request->semester,
+                'reason'         => $request->reason,
+                'status'         => 'pending',
+                'submitted_at'   => now(),
             ]);
 
             // Create approval records for all active departments
