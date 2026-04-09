@@ -9,16 +9,11 @@
 .cl-row{
     display:grid;grid-template-columns:1fr 90px 120px 90px 90px;
     align-items:center;gap:12px;
-    padding:14px 20px;border-radius:12px;
-    border:1px solid rgba(16,185,129,0.12);
-    background:rgba(16,185,129,0.02);
-    transition:all 0.3s;margin-bottom:8px;
+    padding:13px 18px;border-radius:10px;
+    border:1px solid #e2e8f0;background:#fff;
+    transition:all 0.2s;margin-bottom:6px;
 }
-.cl-row:hover{
-    border-color:rgba(16,185,129,0.35);
-    background:rgba(16,185,129,0.06);
-    box-shadow:0 0 20px rgba(16,185,129,0.1);
-}
+.cl-row:hover{border-color:#a7f3d0;background:#f0fdf4;}
 @media(max-width:640px){
     .cl-row{grid-template-columns:1fr 80px;grid-template-rows:auto auto;}
     .cl-row .cl-hide{display:none;}
@@ -48,11 +43,11 @@
     <!-- Table Header -->
     <div style="padding:12px 20px 10px;border-bottom:1px solid rgba(16,185,129,0.1);">
         <div class="cl-row" style="background:transparent;border:none;margin:0;padding:0 0 4px;">
-            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Academic Year / Semester</span>
-            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Type</span>
-            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Progress</span>
-            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Status</span>
-            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.5);">Action</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Academic Year / Semester</span>
+            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Type</span>
+            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Progress</span>
+            <span class="cl-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Status</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#94a3b8;">Action</span>
         </div>
     </div>
 
