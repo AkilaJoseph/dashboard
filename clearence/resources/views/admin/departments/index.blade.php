@@ -8,11 +8,11 @@
 <style>
 .dept-row{
     display:grid;grid-template-columns:50px 1.5fr 80px 1.5fr 60px 80px 90px;
-    align-items:center;gap:10px;padding:13px 18px;border-radius:11px;
-    border:1px solid rgba(16,185,129,0.1);background:rgba(16,185,129,0.02);
-    transition:all 0.25s;margin-bottom:7px;
+    align-items:center;gap:10px;padding:13px 18px;border-radius:9px;
+    border:1px solid #e2e8f0;background:#fff;
+    transition:all 0.15s;margin-bottom:6px;
 }
-.dept-row:hover{border-color:rgba(16,185,129,0.28);background:rgba(16,185,129,0.05);}
+.dept-row:hover{border-color:#a7f3d0;background:#f0fdf4;}
 @media(max-width:768px){
     .dept-row{grid-template-columns:50px 1fr 90px;}
     .d-hide{display:none;}
@@ -28,51 +28,51 @@
 
 <div class="glow-card" style="padding:0;overflow:hidden;">
     <!-- Header -->
-    <div style="padding:14px 20px 8px;border-bottom:1px solid rgba(16,185,129,0.1);">
+    <div style="background:#f8fafc;border-bottom:2px solid #e2e8f0;padding:10px 20px;">
         <div class="dept-row" style="background:transparent;border:none;margin:0;padding:0;">
-            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">#</span>
-            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">Department</span>
-            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">Code</span>
-            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">Description</span>
-            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">Officers</span>
-            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">Status</span>
-            <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(52,211,153,0.4);">Actions</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">#</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Department</span>
+            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Code</span>
+            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Description</span>
+            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Officers</span>
+            <span class="d-hide" style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Status</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#94a3b8;">Actions</span>
         </div>
     </div>
 
     <div style="padding:12px 18px 18px;">
         @forelse($departments as $dept)
         <div class="dept-row">
-            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#020904;box-shadow:0 0 14px rgba(16,185,129,0.4);">
+            <div style="width:32px;height:32px;border-radius:8px;background:#059669;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;">
                 {{ $dept->priority }}
             </div>
-            <p style="font-size:13px;font-weight:700;color:#e2e8f0;">{{ $dept->name }}</p>
+            <p style="font-size:13px;font-weight:600;color:#1e293b;">{{ $dept->name }}</p>
             <div class="d-hide">
-                <span style="font-size:11px;font-family:monospace;font-weight:700;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#fbbf24;padding:3px 10px;border-radius:6px;">{{ $dept->code }}</span>
+                <span style="font-size:11px;font-family:monospace;font-weight:700;background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:3px 9px;border-radius:6px;">{{ $dept->code }}</span>
             </div>
-            <p class="d-hide" style="font-size:11px;color:rgba(160,200,175,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($dept->description, 70) }}</p>
-            <p class="d-hide" style="font-size:13px;font-weight:700;color:#e2e8f0;text-align:center;">{{ $dept->officers_count ?? 0 }}</p>
+            <p class="d-hide" style="font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($dept->description, 70) }}</p>
+            <p class="d-hide" style="font-size:13px;font-weight:700;color:#1e293b;text-align:center;">{{ $dept->officers_count ?? 0 }}</p>
             <div class="d-hide">
-                <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;{{ $dept->is_active ? 'background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#34d399;' : 'background:rgba(160,200,175,0.08);border:1px solid rgba(160,200,175,0.15);color:rgba(160,200,175,0.4);' }}">
+                <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;{{ $dept->is_active ? 'background:#d1fae5;border:1px solid #a7f3d0;color:#065f46;' : 'background:#f1f5f9;border:1px solid #cbd5e1;color:#94a3b8;' }}">
                     {{ $dept->is_active ? 'Active' : 'Inactive' }}
                 </span>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:7px;">
                 <a href="{{ route('admin.departments.edit', $dept) }}"
-                   style="font-size:11px;font-weight:700;color:#34d399;text-decoration:none;border:1px solid rgba(16,185,129,0.3);padding:4px 10px;border-radius:6px;transition:all 0.2s;"
-                   onmouseover="this.style.background='rgba(16,185,129,0.1)'" onmouseout="this.style.background='transparent'">EDIT</a>
+                   style="font-size:11px;font-weight:600;color:#059669;text-decoration:none;border:1px solid #a7f3d0;background:#f0fdf4;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
+                   onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0fdf4'">Edit</a>
                 <form action="{{ route('admin.departments.destroy', $dept) }}" method="POST" style="display:inline;"
                       onsubmit="return confirm('Delete {{ $dept->name }}?')">
                     @csrf @method('DELETE')
                     <button type="submit"
-                            style="font-size:11px;font-weight:700;color:rgba(248,113,113,0.6);background:transparent;border:1px solid rgba(239,68,68,0.2);padding:4px 10px;border-radius:6px;cursor:pointer;transition:all 0.2s;"
-                            onmouseover="this.style.background='rgba(239,68,68,0.08)'" onmouseout="this.style.background='transparent'">DEL</button>
+                            style="font-size:11px;font-weight:600;color:#ef4444;background:#fff;border:1px solid #fecaca;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all 0.15s;"
+                            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">Del</button>
                 </form>
             </div>
         </div>
         @empty
         <div style="text-align:center;padding:48px;">
-            <p style="color:rgba(160,200,175,0.4);font-size:13px;">No departments configured.</p>
+            <p style="color:#94a3b8;font-size:13px;">No departments configured.</p>
         </div>
         @endforelse
     </div>

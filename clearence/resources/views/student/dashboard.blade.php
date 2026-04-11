@@ -11,7 +11,7 @@
 .profile-card{
     background:#fff;border:1px solid #e2e8f0;border-radius:14px;
     box-shadow:0 1px 4px rgba(0,0,0,0.06);overflow:hidden;
-    margin-bottom:22px;border-left:4px solid #059669;
+    margin-bottom:22px;
 }
 .avatar{
     width:56px;height:56px;border-radius:10px;
@@ -19,21 +19,17 @@
     display:flex;align-items:center;justify-content:center;
     font-size:20px;font-weight:900;color:#fff;flex-shrink:0;
 }
-.stat-glow-card{
-    background:#fff;border-radius:12px;padding:20px 22px;
-    border:1px solid #e2e8f0;
-    box-shadow:0 1px 3px rgba(0,0,0,0.05);
-    transition:box-shadow 0.2s,transform 0.2s;
+
+/* ── Animated stat cards ── */
+@@keyframes statSlideUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
 }
-.stat-glow-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(5,150,105,0.1);}
-.stat-green{border-top:3px solid #059669;}
-.stat-amber{border-top:3px solid #d97706;}
-.stat-blue{border-top:3px solid #2563eb;}
-.stat-emerald{border-top:3px solid #10b981;}
-.num-green{font-size:34px;font-weight:800;color:#059669;}
-.num-amber{font-size:34px;font-weight:800;color:#d97706;}
-.num-blue{font-size:34px;font-weight:800;color:#2563eb;}
-.num-emerald{font-size:34px;font-weight:800;color:#10b981;}
+.stat-anim {
+    opacity:0;
+    animation: statSlideUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
 .clearance-row{
     display:flex;align-items:center;justify-content:space-between;
     padding:14px 16px;border-radius:10px;
@@ -80,24 +76,89 @@
     </div>
 </div>
 
-<!-- Stats Grid -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px;">
-    <div class="stat-glow-card stat-green">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;margin-bottom:8px;">Total Requests</p>
-        <p class="num-green">{{ $stats['total'] }}</p>
+<!-- Stats Grid — animated cards -->
+<div class="grid grid-cols-2 gap-5 mb-6 lg:grid-cols-4">
+
+    {{-- 1 — Total Requests --}}
+    <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
+         style="animation-delay:0ms;">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">Total Requests</p>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f0fdf4;">
+                <svg class="w-5 h-5" style="color:#059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+        </div>
+        <div>
+            <p class="text-4xl font-extrabold text-slate-800 leading-none"
+               data-count="{{ $stats['total'] }}">0</p>
+            <p class="text-xs text-slate-400 mt-2">All submitted clearances</p>
+        </div>
+        <div class="h-1 w-10 rounded-full" style="background:#059669;opacity:0.2;"></div>
     </div>
-    <div class="stat-glow-card stat-amber">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;margin-bottom:8px;">Pending</p>
-        <p class="num-amber">{{ $stats['pending'] }}</p>
+
+    {{-- 2 — Pending --}}
+    <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
+         style="animation-delay:100ms;">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">Pending</p>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fffbeb;">
+                <svg class="w-5 h-5" style="color:#d97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+        <div>
+            <p class="text-4xl font-extrabold text-slate-800 leading-none"
+               data-count="{{ $stats['pending'] }}">0</p>
+            <p class="text-xs text-slate-400 mt-2">Awaiting first review</p>
+        </div>
+        <div class="h-1 w-10 rounded-full" style="background:#d97706;opacity:0.2;"></div>
     </div>
-    <div class="stat-glow-card stat-blue">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;margin-bottom:8px;">In Progress</p>
-        <p class="num-blue">{{ $stats['in_progress'] }}</p>
+
+    {{-- 3 — In Progress --}}
+    <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
+         style="animation-delay:200ms;">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">In Progress</p>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#eff6ff;">
+                <svg class="w-5 h-5" style="color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+            </div>
+        </div>
+        <div>
+            <p class="text-4xl font-extrabold text-slate-800 leading-none"
+               data-count="{{ $stats['in_progress'] }}">0</p>
+            <p class="text-xs text-slate-400 mt-2">Partially approved</p>
+        </div>
+        <div class="h-1 w-10 rounded-full" style="background:#3b82f6;opacity:0.2;"></div>
     </div>
-    <div class="stat-glow-card stat-emerald">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;margin-bottom:8px;">Approved</p>
-        <p class="num-emerald">{{ $stats['approved'] }}</p>
+
+    {{-- 4 — Approved --}}
+    <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
+         style="animation-delay:300ms;">
+        <div class="flex items-center justify-between">
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">Approved</p>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f0fdf4;">
+                <svg class="w-5 h-5" style="color:#10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+        <div>
+            <p class="text-4xl font-extrabold text-slate-800 leading-none"
+               data-count="{{ $stats['approved'] }}">0</p>
+            <p class="text-xs text-slate-400 mt-2">Fully cleared</p>
+        </div>
+        <div class="h-1 w-10 rounded-full" style="background:#10b981;opacity:0.2;"></div>
     </div>
+
 </div>
 
 <!-- Recent Clearances -->
@@ -169,4 +230,25 @@
     </div>
 </div>
 
+<script>
+(function () {
+    function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+    function animateCount(el, target, duration) {
+        if (target === 0) { el.textContent = '0'; return; }
+        var start = performance.now();
+        function step(now) {
+            var elapsed  = now - start;
+            var progress = Math.min(elapsed / duration, 1);
+            el.textContent = Math.floor(easeOutQuart(progress) * target);
+            if (progress < 1) requestAnimationFrame(step);
+            else el.textContent = target;
+        }
+        requestAnimationFrame(step);
+    }
+    document.querySelectorAll('[data-count]').forEach(function (el, i) {
+        var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+        setTimeout(function () { animateCount(el, target, 800); }, i * 100 + 300);
+    });
+})();
+</script>
 @endsection
