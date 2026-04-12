@@ -19,13 +19,19 @@
 </head>
 <body class="bg-gray-200 min-h-screen flex flex-col items-center py-10">
 
-<!-- Print Button -->
-<div class="no-print mb-6 flex space-x-3">
+<!-- Action Buttons -->
+<div class="no-print mb-6 flex space-x-3 flex-wrap gap-2 justify-center">
+    <a href="{{ route('student.clearances.certificate', $clearance) }}"
+       class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm shadow"
+       style="background: #059669;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span>Download PDF</span>
+    </a>
     <button onclick="window.print()"
             class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm shadow"
             style="background: #7f1d1d;">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-        <span>Print / Save as PDF</span>
+        <span>Print</span>
     </button>
     <a href="{{ route('student.clearances.show', $clearance) }}"
        class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-lg text-gray-700 font-semibold text-sm shadow bg-white">
