@@ -187,6 +187,10 @@
             <button type="submit" class="btn-signin">Sign In to Portal</button>
         </form>
 
+        <p style="text-align:center;font-size:12px;color:#64748b;margin-top:16px;">
+            New student? <a href="{{ route('register') }}" style="color:#059669;font-weight:600;text-decoration:none;">Create an account</a>
+        </p>
+
         <div class="demo">
             <p class="demo-title">&#9654; Demo Access Credentials</p>
             <div class="demo-row">

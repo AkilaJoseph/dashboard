@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Student\ClearanceController;
 use App\Http\Controllers\Officer\DashboardController as OfficerDashboard;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ClearanceController as AdminClearanceController;
 
 // Public routes
 Route::get('/', function () {
@@ -20,6 +22,8 @@ Route::get('/', function () {
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
 
 // Student routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
@@ -44,4 +48,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('users', UserController::class);
     Route::resource('departments', DepartmentController::class);
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    // Clearance management
+    Route::get('/clearances', [AdminClearanceController::class, 'index'])->name('clearances.index');
+    Route::get('/clearances/{clearance}', [AdminClearanceController::class, 'show'])->name('clearances.show');
+    Route::post('/clearances/{clearance}/approvals/{approval}/override', [AdminClearanceController::class, 'override'])
+        ->name('clearances.override');
 });
