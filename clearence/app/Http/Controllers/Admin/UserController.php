@@ -49,6 +49,16 @@ class UserController extends Controller
             ->with('success', 'User created successfully!');
     }
 
+    public function show(User $user)
+    {
+        $user->load('department');
+        $clearances = null;
+        if ($user->isStudent()) {
+            $clearances = $user->clearances()->with('approvals.department')->latest()->get();
+        }
+        return view('admin.users.show', compact('user', 'clearances'));
+    }
+
     public function edit(User $user)
     {
         $departments = Department::all();

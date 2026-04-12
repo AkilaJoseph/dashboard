@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Clearance;
 use App\Models\ClearanceApproval;
 use App\Models\Department;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -86,8 +87,13 @@ class ClearanceController extends Controller
             return back()->with('error', 'Certificate can only be downloaded for approved clearances.');
         }
 
-        // Generate PDF (we'll implement this later)
-        // For now, return a view
-        return view('student.clearances.certificate', compact('clearance'));
+        $clearance->load('approvals.department', 'approvals.officer');
+
+        $pdf = Pdf::loadView('student.clearances.certificate_pdf', compact('clearance'))
+            ->setPaper('a4', 'portrait');
+
+        $filename = 'MUST_Clearance_' . $clearance->user->student_id . '_' . $clearance->id . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

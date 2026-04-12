@@ -80,6 +80,9 @@
             </div>
 
             <div style="display:flex;align-items:center;gap:7px;">
+                <a href="{{ route('admin.users.show', $user) }}"
+                   style="font-size:11px;font-weight:600;color:#3b82f6;text-decoration:none;border:1px solid #bfdbfe;background:#eff6ff;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
+                   onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">View</a>
                 <a href="{{ route('admin.users.edit', $user) }}"
                    style="font-size:11px;font-weight:600;color:#059669;text-decoration:none;border:1px solid #a7f3d0;background:#f0fdf4;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
                    onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0fdf4'">Edit</a>
