@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Officer;
 use App\Http\Controllers\Controller;
 use App\Models\ClearanceApproval;
 use App\Models\Clearance;
+use App\Notifications\DepartmentApprovalNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,8 +57,8 @@ class ApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        // Update overall clearance status
         $approval->clearance->updateOverallStatus();
+        $approval->clearance->user->notify(new DepartmentApprovalNotification($approval));
 
         return redirect()->route('officer.approvals.index')
             ->with('success', 'Clearance approved successfully!');
@@ -81,8 +82,8 @@ class ApprovalController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        // Update overall clearance status
         $approval->clearance->updateOverallStatus();
+        $approval->clearance->user->notify(new DepartmentApprovalNotification($approval));
 
         return redirect()->route('officer.approvals.index')
             ->with('success', 'Clearance rejected.');

@@ -7,6 +7,9 @@ use App\Models\Clearance;
 use App\Models\ClearanceApproval;
 use App\Models\Department;
 use Barryvdh\DomPDF\Facade\Pdf;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Output\QRMarkupSVG;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -77,22 +80,28 @@ class ClearanceController extends Controller
 
     public function downloadCertificate(Clearance $clearance)
     {
-        // Ensure student can only download their own clearance form
         if ($clearance->user_id !== Auth::id()) {
             abort(403);
         }
 
         $clearance->load('user', 'approvals.department', 'approvals.officer');
 
-        // Generate unique verification code
         $verificationCode = 'MUST/' . strtoupper(substr($clearance->user->student_id ?? 'STU', 0, 8))
             . '/' . str_pad($clearance->id, 5, '0', STR_PAD_LEFT)
             . '/' . $clearance->submitted_at?->format('Ymd');
 
-        $pdf = Pdf::loadView('student.clearances.certificate_pdf', compact('clearance', 'verificationCode'))
+        $options = new QROptions([
+            'outputInterface' => QRMarkupSVG::class,
+            'outputBase64'    => false,
+            'scale'           => 4,
+        ]);
+        $qrCode = (new QRCode($options))->render($verificationCode);
+
+        $pdf = Pdf::loadView('student.clearances.certificate_pdf', compact('clearance', 'verificationCode', 'qrCode'))
             ->setPaper('a4', 'portrait');
 
-        $filename = 'MUST_Clearance_Form_' . ($clearance->user->student_id ?? 'STU') . '_' . $clearance->id . '.pdf';
+        $safeId   = str_replace(['/', '\\', ' '], '_', $clearance->user->student_id ?? 'STU');
+        $filename = 'MUST_Clearance_Form_' . $safeId . '_' . $clearance->id . '.pdf';
 
         return $pdf->download($filename);
     }

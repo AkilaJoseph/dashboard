@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'MUST Clearance') — MUST CMS</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -236,6 +241,115 @@
             box-shadow: 0 4px 12px rgba(5,150,105,0.1);
             transform: translateY(-2px);
         }
+
+        /* ── Topbar dropdowns ── */
+        .tb-btn {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 7px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: background 0.15s, color 0.15s;
+        }
+        .tb-btn:hover { background: var(--bg); color: var(--text); }
+
+        .tb-badge {
+            position: absolute;
+            top: 2px; right: 2px;
+            min-width: 16px; height: 16px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
+            line-height: 1;
+        }
+
+        .tb-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            z-index: 9999;
+            min-width: 260px;
+            display: none;
+            animation: fade-in-up 0.15s ease;
+        }
+        .tb-dropdown.open { display: block; }
+
+        .tb-dd-header {
+            padding: 12px 16px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .tb-dd-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 13px;
+            transition: background 0.12s;
+            border-bottom: 1px solid #f8fafc;
+            cursor: pointer;
+        }
+        .tb-dd-item:last-child { border-bottom: none; }
+        .tb-dd-item:hover { background: var(--green-pale); }
+        .tb-dd-item.unread { background: #f0fdf4; }
+
+        .notif-icon {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .notif-approved { background: #d1fae5; color: #059669; }
+        .notif-rejected  { background: #fee2e2; color: #ef4444; }
+        .notif-pending   { background: #fef3c7; color: #d97706; }
+
+        .tb-dd-footer {
+            padding: 8px 14px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .tb-dd-footer a {
+            font-size: 12px;
+            color: var(--green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .profile-avatar {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            background: var(--green);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800;
+            font-size: 13px;
+            color: #fff;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.15s;
+        }
+        .profile-avatar:hover { border-color: var(--green-mid); }
     </style>
 </head>
 <body>
@@ -343,14 +457,78 @@
     <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
 
         <!-- Top Bar -->
-        <header style="background:var(--white); border-bottom:1px solid var(--border); padding:13px 28px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <header style="background:var(--white); border-bottom:1px solid var(--border); padding:11px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <div>
                 <h2 style="font-size:16px; font-weight:700; color:var(--text); margin:0;">@yield('page-title','Dashboard')</h2>
                 <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0;">@yield('page-subtitle','Mbeya University of Science and Technology')</p>
             </div>
-            <div style="display:flex; align-items:center; gap:8px; font-size:11px; color:var(--text-muted);">
-                <span style="width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block;"></span>
-                System Online &nbsp;|&nbsp; {{ now()->format('d M Y') }}
+
+            <div style="display:flex; align-items:center; gap:6px;">
+                <!-- System status -->
+                <span style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:5px; margin-right:8px;">
+                    <span style="width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block;"></span>
+                    {{ now()->format('d M Y') }}
+                </span>
+
+                @auth
+                <!-- ── Notification Bell ── -->
+                <div style="position:relative;" id="notif-wrap">
+                    <button class="tb-btn" id="notif-btn" onclick="toggleDropdown('notif-dd')" title="Notifications">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="tb-badge" id="notif-count" style="display:none;">0</span>
+                    </button>
+
+                    <div class="tb-dropdown" id="notif-dd" style="min-width:300px;">
+                        <div class="tb-dd-header" style="display:flex;align-items:center;justify-content:space-between;">
+                            <span>Notifications</span>
+                            <button onclick="markAllRead()" style="font-size:10px;color:var(--green);background:none;border:none;cursor:pointer;font-weight:600;">Mark all read</button>
+                        </div>
+                        <div id="notif-list" style="max-height:320px;overflow-y:auto;">
+                            <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;">Loading...</div>
+                        </div>
+                        <div class="tb-dd-footer">
+                            <a href="{{ route('notifications.index') }}">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Profile Avatar ── -->
+                <div style="position:relative;" id="profile-wrap">
+                    <button class="tb-btn" onclick="toggleDropdown('profile-dd')" title="Account" style="padding:4px;">
+                        <div class="profile-avatar">
+                            {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                        </div>
+                    </button>
+
+                    <div class="tb-dropdown" id="profile-dd" style="min-width:220px;">
+                        <div class="tb-dd-header">
+                            <p style="font-size:13px;font-weight:700;color:var(--text);margin:0 0 2px;text-transform:none;letter-spacing:0;">{{ auth()->user()->name }}</p>
+                            <p style="font-size:11px;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;margin:0;">{{ auth()->user()->email }}</p>
+                        </div>
+
+                        <a href="{{ route('profile.show') }}" class="tb-dd-item" onclick="closeAll()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;color:var(--green-mid)"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            <span>My Profile</span>
+                        </a>
+
+                        <a href="{{ route('notifications.index') }}" class="tb-dd-item" onclick="closeAll()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;color:var(--green-mid)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                            <span>Notifications</span>
+                        </a>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="tb-dd-item" style="width:100%;border:none;background:none;text-align:left;">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;color:#ef4444"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                <span style="color:#ef4444;font-weight:600;">Sign Out</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @endauth
             </div>
         </header>
 
@@ -384,5 +562,122 @@
 @yield('content')
 @endauth
 
+@stack('scripts')
+<script>
+// ── Dropdown toggle ──
+function toggleDropdown(id) {
+    const target = document.getElementById(id);
+    const isOpen = target.classList.contains('open');
+    closeAll();
+    if (!isOpen) {
+        target.classList.add('open');
+        if (id === 'notif-dd') loadNotifications();
+    }
+}
+function closeAll() {
+    document.querySelectorAll('.tb-dropdown').forEach(d => d.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('#notif-wrap') && !e.target.closest('#profile-wrap')) closeAll();
+});
+
+// ── Notifications ──
+function loadNotifications() {
+    fetch('{{ route("notifications.unread") }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-count');
+
+            if (data.count > 0) {
+                badge.textContent = data.count > 99 ? '99+' : data.count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (!data.items || data.items.length === 0) {
+                list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;">No new notifications</div>';
+                return;
+            }
+
+            list.innerHTML = data.items.map(n => `
+                <div class="tb-dd-item unread" onclick="markRead('${n.id}', ${n.clearance_id})">
+                    <div class="notif-icon notif-${n.status}">
+                        ${n.icon === 'check'
+                            ? '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+                            : '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>'}
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <p style="font-size:12px;color:var(--text);margin:0 0 2px;line-height:1.4;">${n.message}</p>
+                        <p style="font-size:10px;color:var(--text-muted);margin:0;">${n.created_at}</p>
+                    </div>
+                </div>
+            `).join('');
+        })
+        .catch(() => {});
+}
+
+function markRead(id, clearanceId) {
+    fetch('{{ route("notifications.markRead") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+        body: JSON.stringify({ id }),
+    }).then(() => {
+        closeAll();
+        updateBadge();
+        if (clearanceId) window.location.href = '/student/clearances/' + clearanceId;
+    });
+}
+
+function markAllRead() {
+    fetch('{{ route("notifications.markRead") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+        body: JSON.stringify({}),
+    }).then(() => { closeAll(); updateBadge(); });
+}
+
+function updateBadge() {
+    fetch('{{ route("notifications.unread") }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('notif-count');
+            if (badge) {
+                badge.textContent = data.count > 99 ? '99+' : data.count;
+                badge.style.display = data.count > 0 ? 'flex' : 'none';
+            }
+        }).catch(() => {});
+}
+
+// ── Poll badge every 30s ──
+@auth
+updateBadge();
+setInterval(updateBadge, 30000);
+@endauth
+
+// ── PWA: Register Service Worker ──
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+                console.log('SW registered');
+
+                // Request notification permission
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+
+                // Poll SW for notifications every 30s
+                setInterval(() => {
+                    if (reg.active) {
+                        reg.active.postMessage({ type: 'POLL_NOTIFICATIONS' });
+                    }
+                }, 30000);
+            })
+            .catch(err => console.warn('SW failed:', err));
+    });
+}
+</script>
 </body>
 </html>

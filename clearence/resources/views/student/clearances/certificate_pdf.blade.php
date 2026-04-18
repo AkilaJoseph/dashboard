@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Clearance Certificate — {{ $clearance->user->name }}</title>
+    <title>Student Clearance Form — {{ $clearance->user->name }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,101 +14,97 @@
             background: #fff;
         }
 
-        .page {
-            padding: 30px 40px;
-        }
+        .page { padding: 28px 38px; }
 
         /* ── Header ── */
         .header {
-            border-bottom: 3px solid #064e3b;
-            padding-bottom: 14px;
-            margin-bottom: 18px;
-        }
-        .header-inner {
-            display: flex; /* will fallback in dompdf - use table */
+            border-bottom: 3px double #064e3b;
+            padding-bottom: 12px;
+            margin-bottom: 4px;
         }
         .header-table { width: 100%; border-collapse: collapse; }
         .header-table td { vertical-align: middle; }
+
         .emblem {
-            width: 60px; height: 60px;
+            width: 64px; height: 64px;
+            text-align: center;
+        }
+        .emblem img { width: 64px; height: 64px; }
+        .emblem-fallback {
+            width: 64px; height: 64px;
             border: 2px solid #064e3b;
             border-radius: 50%;
-            display: inline-block;
             text-align: center;
-            line-height: 56px;
+            line-height: 60px;
             font-size: 10pt;
             font-weight: bold;
             color: #064e3b;
         }
         .univ-name {
-            font-size: 14pt;
+            font-size: 13pt;
             font-weight: bold;
             color: #064e3b;
-            line-height: 1.2;
+            line-height: 1.3;
         }
-        .univ-sub {
+        .univ-address {
             font-size: 8pt;
             color: #475569;
             margin-top: 3px;
         }
-        .cert-title {
-            font-size: 16pt;
+
+        /* ── Form Title ── */
+        .form-title-wrap {
+            text-align: center;
+            margin: 12px 0 4px;
+        }
+        .form-title {
+            font-size: 15pt;
             font-weight: bold;
             color: #064e3b;
-            text-align: center;
-            margin: 14px 0 6px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
-        .cert-subtitle {
-            text-align: center;
+        .form-subtitle {
             font-size: 8pt;
             color: #64748b;
-            margin-bottom: 18px;
+            margin-top: 4px;
         }
-
-        /* ── Cert No badge ── */
-        .cert-no {
+        .ref-line {
             text-align: right;
             font-size: 8pt;
             color: #64748b;
-            margin-bottom: 14px;
+            margin: 8px 0 12px;
         }
 
-        /* ── Student info ── */
-        .info-box {
-            border: 1px solid #d1fae5;
-            border-left: 4px solid #059669;
-            background: #f0fdf4;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            border-radius: 4px;
-        }
-        .info-table { width: 100%; border-collapse: collapse; }
-        .info-table td {
-            padding: 4px 8px;
+        /* ── Section heading ── */
+        .section-heading {
             font-size: 9.5pt;
-        }
-        .info-table td:first-child {
             font-weight: bold;
-            color: #065f46;
-            width: 38%;
-        }
-
-        /* ── Department table ── */
-        .dept-title {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #064e3b;
-            margin: 16px 0 8px;
+            color: #fff;
+            background: #064e3b;
+            padding: 5px 10px;
+            margin: 14px 0 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 4px;
         }
-        .dept-table { width: 100%; border-collapse: collapse; }
+
+        /* ── Student Details ── */
+        .student-box {
+            border: 1px solid #d1fae5;
+            border-top: none;
+            padding: 10px 14px;
+            background: #f0fdf4;
+            margin-bottom: 0;
+        }
+        .student-table { width: 100%; border-collapse: collapse; }
+        .student-table td { padding: 4px 6px; font-size: 9.5pt; }
+        .student-table td.lbl { font-weight: bold; color: #065f46; width: 22%; }
+        .student-table td.val { width: 28%; }
+
+        /* ── Clearance Details Table ── */
+        .dept-table { width: 100%; border-collapse: collapse; border: 1px solid #d1fae5; }
         .dept-table th {
-            background: #064e3b;
+            background: #065f46;
             color: #fff;
             font-size: 8pt;
             text-transform: uppercase;
@@ -119,52 +115,68 @@
         .dept-table td {
             font-size: 9pt;
             padding: 7px 10px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
         }
         .dept-table tr:nth-child(even) td { background: #f8fafc; }
-        .badge-approved {
-            background: #d1fae5;
-            color: #065f46;
+
+        .badge {
             padding: 2px 8px;
             border-radius: 3px;
             font-size: 8pt;
             font-weight: bold;
+            text-transform: uppercase;
         }
+        .badge-approved  { background: #d1fae5; color: #065f46; }
+        .badge-pending   { background: #fef9c3; color: #854d0e; }
+        .badge-rejected  { background: #fee2e2; color: #991b1b; }
 
-        /* ── Declaration ── */
-        .declaration {
-            border: 1px solid #e2e8f0;
-            background: #fafafa;
-            padding: 10px 14px;
-            margin: 16px 0;
-            font-size: 9pt;
-            color: #374151;
-            line-height: 1.6;
+        /* ── Final Status ── */
+        .final-status-box {
+            border: 2px solid #064e3b;
+            padding: 10px 16px;
+            margin: 14px 0;
+            background: #f0fdf4;
+        }
+        .final-status-table { width: 100%; border-collapse: collapse; }
+        .final-status-table td { padding: 4px 8px; font-size: 9.5pt; vertical-align: top; }
+        .final-status-table td.lbl { font-weight: bold; color: #065f46; width: 28%; }
+
+        .overall-badge {
+            font-size: 11pt;
+            font-weight: bold;
+            padding: 3px 14px;
             border-radius: 4px;
         }
+        .overall-approved { background: #d1fae5; color: #065f46; border: 1px solid #059669; }
+        .overall-pending  { background: #fef9c3; color: #854d0e; border: 1px solid #d97706; }
+        .overall-rejected { background: #fee2e2; color: #991b1b; border: 1px solid #dc2626; }
 
-        /* ── Signatures ── */
-        .sig-table { width: 100%; border-collapse: collapse; margin-top: 28px; }
-        .sig-table td { width: 33.33%; vertical-align: bottom; padding: 0 8px; text-align: center; }
-        .sig-line { border-top: 1px solid #1a1a1a; margin-top: 36px; padding-top: 5px; font-size: 8pt; color: #475569; }
-        .sig-name { font-size: 9pt; font-weight: bold; color: #1a1a1a; }
+        /* ── Signature ── */
+        .sig-outer { margin-top: 20px; }
+        .sig-table { width: 100%; border-collapse: collapse; }
+        .sig-table td { width: 33.33%; padding: 0 8px; text-align: center; vertical-align: bottom; }
+        .sig-line { border-top: 1px solid #333; margin-top: 38px; padding-top: 5px; }
+        .sig-name { font-size: 9pt; font-weight: bold; }
+        .sig-role { font-size: 7.5pt; color: #475569; margin-top: 2px; }
 
-        /* ── Footer ── */
-        .footer {
-            border-top: 2px solid #064e3b;
-            padding-top: 8px;
-            margin-top: 22px;
-            text-align: center;
-            font-size: 7.5pt;
-            color: #94a3b8;
-        }
+        /* ── QR + Footer row ── */
+        .bottom-table { width: 100%; border-collapse: collapse; margin-top: 20px; border-top: 2px solid #064e3b; padding-top: 10px; }
+        .bottom-table td { vertical-align: top; padding-top: 10px; }
+        .qr-cell { width: 90px; text-align: center; }
+        .qr-cell svg { width: 80px; height: 80px; }
+        .qr-label { font-size: 6.5pt; color: #64748b; margin-top: 3px; }
+        .footer-cell { padding-left: 12px; }
+        .footer-text { font-size: 7.5pt; color: #64748b; line-height: 1.7; }
+        .footer-note { font-size: 7pt; color: #94a3b8; margin-top: 6px; font-style: italic; }
+
+        /* ── Watermark ── */
         .watermark {
             position: fixed;
-            top: 50%;
+            top: 48%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 72pt;
-            color: rgba(5,150,105,0.04);
+            font-size: 80pt;
+            color: rgba(5,150,105,0.035);
             font-weight: bold;
             z-index: -1;
             white-space: nowrap;
@@ -174,130 +186,188 @@
 <body>
 <div class="page">
 
-    <div class="watermark">CLEARED</div>
+    <div class="watermark">{{ strtoupper($clearance->status) }}</div>
 
-    <!-- Header -->
+    {{-- ═══ 1. HEADER ═══ --}}
     <div class="header">
         <table class="header-table">
             <tr>
-                <td style="width:70px;">
-                    <div class="emblem">MUST</div>
+                <td style="width:72px;">
+                    @php $logoPath = public_path('images/must_logo.png'); @endphp
+                    @if(file_exists($logoPath))
+                        <div class="emblem"><img src="{{ $logoPath }}" alt="MUST Logo"/></div>
+                    @else
+                        <div class="emblem-fallback">MUST</div>
+                    @endif
                 </td>
                 <td style="padding-left:12px;">
                     <div class="univ-name">Mbeya University of Science and Technology</div>
-                    <div class="univ-sub">P.O. Box 131, Mbeya, Tanzania &nbsp;|&nbsp; must.ac.tz</div>
+                    <div class="univ-address">P.O. Box 131, Mbeya, Tanzania &nbsp;|&nbsp; must.ac.tz &nbsp;|&nbsp; +255 25 240 4572</div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <div class="cert-title">Clearance Certificate</div>
-    <div class="cert-subtitle">This certifies that the student named below has been cleared by all required departments</div>
-
-    <div class="cert-no">
-        Certificate No: MUST/CLC/{{ str_pad($clearance->id, 5, '0', STR_PAD_LEFT) }}/{{ date('Y') }}
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        Issued: {{ now()->format('d F Y') }}
+    {{-- Title --}}
+    <div class="form-title-wrap">
+        <div class="form-title">Student Clearance Form</div>
+        <div class="form-subtitle">Official clearance document issued by the Registry Office</div>
+    </div>
+    <div class="ref-line">
+        Form Ref: MUST/CLF/{{ str_pad($clearance->id, 5, '0', STR_PAD_LEFT) }}/{{ date('Y') }}
+        &nbsp;|&nbsp; Date Issued: {{ now()->format('d F Y') }}
     </div>
 
-    <!-- Student Info -->
-    <div class="info-box">
-        <table class="info-table">
+    {{-- ═══ 2. STUDENT DETAILS ═══ --}}
+    <div class="section-heading">Student Details</div>
+    <div class="student-box">
+        <table class="student-table">
             <tr>
-                <td>Full Name:</td>
-                <td><strong>{{ strtoupper($clearance->user->name) }}</strong></td>
-                <td>Student ID:</td>
-                <td><strong>{{ $clearance->user->student_id ?? '—' }}</strong></td>
+                <td class="lbl">Full Name:</td>
+                <td class="val"><strong>{{ strtoupper($clearance->user->name) }}</strong></td>
+                <td class="lbl">Student ID:</td>
+                <td class="val"><strong>{{ $clearance->user->student_id ?? '—' }}</strong></td>
             </tr>
             <tr>
-                <td>Registration Number:</td>
-                <td>{{ $clearance->user->registration_number ?? '—' }}</td>
-                <td>Year of Study:</td>
-                <td>{{ $clearance->user->year_of_study ?? '—' }}</td>
+                <td class="lbl">Registration No:</td>
+                <td class="val">{{ $clearance->user->registration_number ?? '—' }}</td>
+                <td class="lbl">Year of Study:</td>
+                <td class="val">{{ $clearance->user->year_of_study ?? '—' }}</td>
             </tr>
             <tr>
-                <td>Programme:</td>
-                <td>{{ $clearance->user->programme ?? '—' }}</td>
-                <td>College:</td>
-                <td>{{ $clearance->user->college ?? '—' }}</td>
+                <td class="lbl">Course / Programme:</td>
+                <td class="val">{{ $clearance->user->programme ?? '—' }}</td>
+                <td class="lbl">College:</td>
+                <td class="val">{{ $clearance->user->college ?? '—' }}</td>
             </tr>
             <tr>
-                <td>Clearance Type:</td>
-                <td>{{ ucfirst($clearance->clearance_type) }}</td>
-                <td>Academic Year:</td>
-                <td>{{ $clearance->academic_year }} &nbsp;/&nbsp; {{ $clearance->semester }}</td>
+                <td class="lbl">Clearance Type:</td>
+                <td class="val">{{ ucfirst($clearance->clearance_type) }}</td>
+                <td class="lbl">Academic Year:</td>
+                <td class="val">{{ $clearance->academic_year }} / {{ $clearance->semester }}</td>
             </tr>
+            @if($clearance->user->email)
+            <tr>
+                <td class="lbl">Email:</td>
+                <td class="val" colspan="3">{{ $clearance->user->email }}</td>
+            </tr>
+            @endif
         </table>
     </div>
 
-    <!-- Department Approvals -->
-    <div class="dept-title">Departmental Clearance Details</div>
+    {{-- ═══ 3. CLEARANCE DETAILS ═══ --}}
+    <div class="section-heading">Clearance Details</div>
     <table class="dept-table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Department</th>
-                <th>Status</th>
-                <th>Reviewed By</th>
-                <th>Date Approved</th>
-                <th>Remarks</th>
+                <th style="width:5%">#</th>
+                <th style="width:22%">Department</th>
+                <th style="width:14%">Status</th>
+                <th style="width:18%">Comment</th>
+                <th style="width:18%">Reviewed By</th>
+                <th style="width:14%">Date</th>
             </tr>
         </thead>
         <tbody>
             @foreach($clearance->approvals->sortBy('department.priority') as $i => $approval)
+            @php
+                $status = $approval->status ?? 'pending';
+                $badgeClass = match($status) {
+                    'approved' => 'badge-approved',
+                    'rejected' => 'badge-rejected',
+                    default    => 'badge-pending',
+                };
+            @endphp
             <tr>
                 <td>{{ $i + 1 }}</td>
                 <td><strong>{{ $approval->department->name }}</strong></td>
-                <td><span class="badge-approved">CLEARED</span></td>
-                <td>{{ $approval->officer?->name ?? '—' }}</td>
-                <td>{{ $approval->reviewed_at?->format('d M Y') ?? '—' }}</td>
-                <td style="font-size:8pt;color:#64748b;">{{ $approval->comments ?? 'No remarks' }}</td>
+                <td><span class="badge {{ $badgeClass }}">{{ ucfirst($status) }}</span></td>
+                <td style="font-size:8pt;color:#374151;">{{ $approval->comments ?? '—' }}</td>
+                <td style="font-size:8.5pt;">{{ $approval->officer?->name ?? '—' }}</td>
+                <td style="font-size:8.5pt;">{{ $approval->reviewed_at?->format('d M Y') ?? '—' }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
 
-    <!-- Declaration -->
-    <div class="declaration">
-        This is to certify that <strong>{{ strtoupper($clearance->user->name) }}</strong>
-        (Student ID: <strong>{{ $clearance->user->student_id ?? 'N/A' }}</strong>) has satisfactorily
-        fulfilled all departmental clearance requirements for
-        <strong>{{ ucfirst($clearance->clearance_type) }} Clearance</strong>
-        for the <strong>{{ $clearance->academic_year }}</strong> academic year,
-        {{ $clearance->semester }}. All departments listed above have confirmed clearance.
-        This certificate is issued without any dues, obligations, or liabilities outstanding
-        against the student.
+    {{-- ═══ 4. FINAL STATUS ═══ --}}
+    @php
+        $overallStatus = $clearance->status ?? 'pending';
+        $overallBadge  = match($overallStatus) {
+            'approved' => 'overall-approved',
+            'rejected' => 'overall-rejected',
+            default    => 'overall-pending',
+        };
+    @endphp
+    <div class="section-heading">Final Status</div>
+    <div class="final-status-box">
+        <table class="final-status-table">
+            <tr>
+                <td class="lbl">Overall Status:</td>
+                <td>
+                    <span class="overall-badge {{ $overallBadge }}">
+                        {{ strtoupper($overallStatus) }}
+                    </span>
+                </td>
+                <td class="lbl">Submitted On:</td>
+                <td>{{ $clearance->submitted_at?->format('d F Y') ?? '—' }}</td>
+            </tr>
+            @if($clearance->reason)
+            <tr>
+                <td class="lbl">Final Comment:</td>
+                <td colspan="3">{{ $clearance->reason }}</td>
+            </tr>
+            @endif
+        </table>
     </div>
 
-    <!-- Signatures -->
-    <table class="sig-table">
+    {{-- ═══ 5. SIGNATURE SECTION ═══ --}}
+    <div class="sig-outer">
+        <table class="sig-table">
+            <tr>
+                <td>
+                    <div class="sig-line">
+                        <div class="sig-name">Registrar</div>
+                        <div class="sig-role">Mbeya University of Science and Technology</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="sig-line">
+                        <div class="sig-name">Director of Academic Affairs</div>
+                        <div class="sig-role">Mbeya University of Science and Technology</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="sig-line">
+                        <div class="sig-name">System Administrator</div>
+                        <div class="sig-role">MUST Clearance Management System</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- ═══ 6. QR CODE + FOOTER ═══ --}}
+    <table class="bottom-table">
         <tr>
-            <td>
-                <div class="sig-line">
-                    <div class="sig-name">Registrar</div>
-                    Mbeya University of Science and Technology
-                </div>
+            <td class="qr-cell">
+                {!! $qrCode !!}
+                <div class="qr-label">Scan to verify</div>
             </td>
-            <td>
-                <div class="sig-line">
-                    <div class="sig-name">Director of Academic Affairs</div>
-                    Mbeya University of Science and Technology
+            <td class="footer-cell">
+                <div class="footer-text">
+                    <strong>Verification Code:</strong> {{ $verificationCode }}<br>
+                    <strong>System:</strong> MUST Automated Clearance System<br>
+                    <strong>Generated:</strong> {{ now()->format('d F Y, H:i') }} EAT<br>
+                    <strong>Contact:</strong> Registry Office, must.ac.tz
                 </div>
-            </td>
-            <td>
-                <div class="sig-line">
-                    <div class="sig-name">System Administrator</div>
-                    CMS — Automated on {{ now()->format('d M Y') }}
+                <div class="footer-note">
+                    This is a system-generated document. For verification, present this form together with your student ID
+                    at the Registry Office or scan the QR code above.
                 </div>
             </td>
         </tr>
     </table>
-
-    <!-- Footer -->
-    <div class="footer">
-        This certificate was generated automatically by the MUST Clearance Management System on {{ now()->format('d F Y, H:i') }} EAT.
-        For verification, contact the Registry Office. &nbsp;|&nbsp; Cert. Ref: MUST/CLC/{{ str_pad($clearance->id, 5, '0', STR_PAD_LEFT) }}/{{ date('Y') }}
-    </div>
 
 </div>
 </body>

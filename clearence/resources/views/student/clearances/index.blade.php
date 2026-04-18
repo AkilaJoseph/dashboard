@@ -97,11 +97,9 @@
                 <a href="{{ route('student.clearances.show', $clearance) }}"
                    style="font-size:12px;font-weight:600;color:#059669;text-decoration:none;border:1px solid #a7f3d0;background:#f0fdf4;padding:4px 12px;border-radius:6px;transition:all 0.15s;"
                    onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0fdf4'">View</a>
-                @if($clearance->status === 'approved')
                 <a href="{{ route('student.clearances.certificate', $clearance) }}"
                    style="font-size:12px;font-weight:600;color:#92400e;text-decoration:none;border:1px solid #fde68a;background:#fef9c3;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
-                   onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef9c3'">Cert</a>
-                @endif
+                   onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef9c3'">Download</a>
             </div>
         </div>
         @endforeach
