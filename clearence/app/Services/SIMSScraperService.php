@@ -24,7 +24,8 @@ class SIMSScraperService
     public function __construct()
     {
         $this->baseUrl       = rtrim(SystemSetting::get('sims_url', 'https://sims.must.ac.tz'), '/');
-        $this->loginUrl      = SystemSetting::get('sims_login_url',   $this->baseUrl . '/logincheck');
+        $savedLoginUrl       = SystemSetting::get('sims_login_url', '');
+        $this->loginUrl      = $savedLoginUrl ?: $this->baseUrl . '/logincheck';
         $this->profilePath   = SystemSetting::get('sims_profile_path', '/studentprofile/');
         $this->username      = SystemSetting::get('sims_username', '');
         $this->password      = SystemSetting::get('sims_password', '');

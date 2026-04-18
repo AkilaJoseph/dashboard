@@ -32,6 +32,14 @@
                 <table style="width:100%;border-collapse:collapse;" id="preview-table"></table>
             </div>
 
+            {{-- Raw scraped data toggle --}}
+            <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                <summary style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;background:#f8fafc;list-style:none;">
+                    ▸ Show raw scraped labels (for debugging field mapping)
+                </summary>
+                <div id="raw-table-wrap" style="padding:12px 14px;overflow-x:auto;"></div>
+            </details>
+
             <h3 style="font-size:13px;font-weight:700;color:var(--text);margin:0 0 12px;">Step 2 — Set Login Credentials</h3>
             <form method="POST" action="{{ route('admin.sims.import') }}" id="import-form">
                 @csrf
@@ -142,8 +150,19 @@ function fetchStudent() {
         ).join('');
 
         document.getElementById('preview').style.display = 'block';
+
+        // Show raw scraped labels for debugging
+        if (res.raw && Object.keys(res.raw).length) {
+            const rawWrap = document.getElementById('raw-table-wrap');
+            rawWrap.innerHTML = '<p style="font-size:11px;color:var(--text-muted);margin:0 0 8px;">All labels scraped from SIMS profile page:</p>'
+                + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+                + Object.entries(res.raw).map(([k, v]) =>
+                    `<tr><td style="padding:3px 6px;border-bottom:1px solid #f1f5f9;color:#374151;font-weight:600;width:50%;">${k}</td><td style="padding:3px 6px;border-bottom:1px solid #f1f5f9;color:#1e293b;">${v}</td></tr>`
+                ).join('')
+                + '</table>';
+        }
     })
-    .catch(() => { btn.disabled = false; btn.textContent = 'Fetch'; });
+    .catch(err => { btn.disabled = false; btn.textContent = 'Fetch'; console.error(err); });
 }
 
 document.getElementById('reg-input').addEventListener('keypress', e => { if (e.key === 'Enter') fetchStudent(); });
