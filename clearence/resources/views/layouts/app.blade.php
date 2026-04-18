@@ -361,33 +361,19 @@
     <aside class="sidebar" style="width:240px; flex-shrink:0; display:flex; flex-direction:column;">
 
         <!-- Logo -->
-        <div style="padding:20px 18px 16px; border-bottom:1px solid rgba(255,255,255,0.08);">
-            <div style="display:flex;align-items:center;gap:12px;">
-                <div class="must-emblem">
-                    <span style="color:#d1fae5; font-weight:900; font-size:14px; letter-spacing:-0.5px;">MUST</span>
-                </div>
+        <div style="padding:18px 16px 14px; border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="display:flex;align-items:center;gap:11px;">
+                @php $logoPath = public_path('images/must_logo.png'); @endphp
+                @if(file_exists($logoPath))
+                    <img src="/images/must_logo.png" alt="MUST" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(209,250,229,0.3);">
+                @else
+                    <div class="must-emblem">
+                        <span style="color:#d1fae5;font-weight:900;font-size:13px;letter-spacing:-0.5px;">MUST</span>
+                    </div>
+                @endif
                 <div>
-                    <p style="font-size:11px; font-weight:700; color:#d1fae5; margin:0; letter-spacing:0.04em;">MBEYA UNIVERSITY</p>
-                    <p style="font-size:9px; color:rgba(209,250,229,0.45); margin:3px 0 0; letter-spacing:0.06em; line-height:1.3;">CLEARANCE MANAGEMENT<br>SYSTEM</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Badge -->
-        <div style="padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.08);">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="width:34px; height:34px; border-radius:8px; background:var(--green); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#fff; flex-shrink:0;">
-                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
-                </div>
-                <div style="min-width:0;">
-                    <p style="font-size:12px; font-weight:600; color:#ecfdf5; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ auth()->user()->name }}</p>
-                    <p style="font-size:10px; color:rgba(209,250,229,0.5); margin:2px 0 0;">
-                        @if(auth()->user()->isStudent() && auth()->user()->student_id)
-                            {{ auth()->user()->student_id }}
-                        @else
-                            {{ ucfirst(auth()->user()->role) }}
-                        @endif
-                    </p>
+                    <p style="font-size:11px;font-weight:700;color:#d1fae5;margin:0;letter-spacing:0.04em;">MBEYA UNIVERSITY</p>
+                    <p style="font-size:9px;color:rgba(209,250,229,0.45);margin:3px 0 0;letter-spacing:0.06em;line-height:1.3;">CLEARANCE MANAGEMENT<br>SYSTEM</p>
                 </div>
             </div>
         </div>
@@ -437,6 +423,16 @@
                 <a href="{{ route('admin.reports.index') }}" class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6"  y1="20" x2="6"  y2="14"/></svg>
                     Reports
+                </a>
+                <div class="glow-sep" style="margin:8px 0;background:rgba(255,255,255,0.08);"></div>
+                <p style="font-size:9px; color:rgba(209,250,229,0.35); letter-spacing:0.12em; text-transform:uppercase; font-weight:700; margin:0 0 6px 8px;">Integrations</p>
+                <a href="{{ route('admin.sims.sync') }}" class="nav-link {{ request()->routeIs('admin.sims.sync') ? 'active' : '' }}">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    SIMS Sync
+                </a>
+                <a href="{{ route('admin.sims.settings') }}" class="nav-link {{ request()->routeIs('admin.sims.settings') ? 'active' : '' }}">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    SIMS Settings
                 </a>
             @endif
         </nav>

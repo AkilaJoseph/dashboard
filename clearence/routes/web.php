@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ClearanceController as AdminClearanceController;
+use App\Http\Controllers\Admin\SIMSController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 
@@ -63,4 +64,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/clearances/{clearance}', [AdminClearanceController::class, 'show'])->name('clearances.show');
     Route::post('/clearances/{clearance}/approvals/{approval}/override', [AdminClearanceController::class, 'override'])
         ->name('clearances.override');
+    // SIMS Integration
+    Route::get('/sims/settings', [SIMSController::class, 'settings'])->name('sims.settings');
+    Route::post('/sims/settings', [SIMSController::class, 'saveSettings'])->name('sims.settings.save');
+    Route::get('/sims/sync', [SIMSController::class, 'sync'])->name('sims.sync');
+    Route::post('/sims/fetch', [SIMSController::class, 'fetchStudent'])->name('sims.fetch');
+    Route::post('/sims/import', [SIMSController::class, 'importStudent'])->name('sims.import');
+    Route::post('/sims/resync/{user}', [SIMSController::class, 'resync'])->name('sims.resync');
 });

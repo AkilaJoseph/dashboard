@@ -18,18 +18,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'role',
-        'student_id',
-        'registration_number',
-        'programme',
-        'college',
-        'year_of_study',
-        'department_id',
-        'password',
-        'is_active',
+        'name', 'first_name', 'middle_name', 'last_name',
+        'email', 'phone', 'role',
+        'student_id', 'registration_number', 'admission_number',
+        'programme', 'entry_programme', 'college', 'campus',
+        'year_of_study', 'entry_year', 'entry_category',
+        'gender', 'birth_date', 'nationality', 'disability',
+        'department_id', 'password', 'is_active', 'sims_synced_at',
     ];
 
     /**
@@ -51,8 +46,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_active' => 'boolean',
+            'sims_synced_at'    => 'datetime',
+            'birth_date'        => 'date',
+            'password'          => 'hashed',
+            'is_active'         => 'boolean',
         ];
     }
 
