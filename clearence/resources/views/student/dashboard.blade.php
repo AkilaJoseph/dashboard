@@ -161,6 +161,9 @@
 
 </div>
 
+{{-- Pending offline drafts — populated client-side from IndexedDB --}}
+@include('student.partials.pending-drafts')
+
 <!-- Recent Clearances -->
 <div class="glow-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">

@@ -5,10 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'MUST Clearance') — MUST CMS</title>
     <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#064e3b">
+    <meta name="application-name" content="ACIMS">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ACIMS">
+    <link rel="apple-touch-icon" href="/images/pwa-icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/pwa-icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/images/pwa-icons/icon-144.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="/images/pwa-icons/icon-128.png">
+    <meta name="msapplication-TileImage" content="/images/pwa-icons/icon-144.png">
+    <meta name="msapplication-TileColor" content="#064e3b">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @php try { @endphp
+    @vite(['resources/js/app.js'])
+    @php } catch (\Throwable $e) { /* Vite not built yet — run: npm run dev */ } @endphp
+    @stack('styles')
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }

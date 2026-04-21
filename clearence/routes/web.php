@@ -39,7 +39,14 @@ Route::middleware('auth')->group(function () {
 // Student routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
-    Route::resource('clearances', ClearanceController::class);
+
+    // Store route gets idempotency protection for offline draft sync replays.
+    // All other resource actions are unchanged.
+    Route::post('/clearances', [ClearanceController::class, 'store'])
+        ->name('clearances.store')
+        ->middleware('idempotency');
+    Route::resource('clearances', ClearanceController::class)->except(['store']);
+
     Route::get('/clearances/{clearance}/certificate', [ClearanceController::class, 'downloadCertificate'])
         ->name('clearances.certificate');
 });

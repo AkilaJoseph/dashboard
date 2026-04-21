@@ -1,21 +1,25 @@
-// ── ACIMS Service Worker ───────────────────────────────────────────────────────
-// Generated from resources/js/pwa/sw-source.js
-// BUILD: dev-20260421
-// To regenerate for production: npm run build
-// ─────────────────────────────────────────────────────────────────────────────
+// ── ACIMS Service Worker — source template ────────────────────────────────────
+// DO NOT edit public/sw.js directly in production; edit this file and run:
+//   npm run build   (vite build && node scripts/build-sw.js)
+//
+// __SW_BUILD__ is replaced by scripts/build-sw.js with the Vite manifest hash.
+// self.__WB_MANIFEST is injected by workbox-build.injectManifest().
 
-const BUILD        = 'dev-20260421';
-const SHELL_CACHE  = `acims-shell-${BUILD}`;
-const ASSET_CACHE  = `acims-assets-${BUILD}`;
-const DATA_CACHE   = `acims-data-${BUILD}`;
+// ── Cache names (all prefixed "acims-" so activate can prune old versions) ──
+const BUILD        = '__SW_BUILD__';
+const SHELL_CACHE  = `acims-shell-${BUILD}`;   // app shell HTML/layout JS+CSS
+const ASSET_CACHE  = `acims-assets-${BUILD}`;  // Vite hashed assets + images
+const DATA_CACHE   = `acims-data-${BUILD}`;    // student/officer/admin routes
 
 const CURRENT_CACHES = [SHELL_CACHE, ASSET_CACHE, DATA_CACHE];
 
-// Precache manifest — empty in dev; injected by scripts/build-sw.js on npm run build
+// ── Precache manifest (injected by workbox-build, empty [] in dev) ────────────
 const PRECACHE = (self.__WB_MANIFEST || []).map(e => (typeof e === 'string' ? e : e.url));
 
 // ─────────────────────────────────────────────────────────────────────────────
-// INSTALL
+// INSTALL — cache offline page + any precache entries from the Vite manifest.
+// Do NOT call skipWaiting() here; updates are user-confirmed via the update
+// toast in register-sw.js which sends a SKIP_WAITING message.
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('install', e => {
     e.waitUntil(
@@ -23,11 +27,13 @@ self.addEventListener('install', e => {
             cache.addAll(['/offline', ...PRECACHE].filter(Boolean)).catch(() => {})
         )
     );
-    // No skipWaiting() — updates are user-confirmed via the toast in register-sw.js
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ACTIVATE — prune stale acims-* caches, then claim clients
+// ACTIVATE — delete any stale "acims-*" caches that aren't in CURRENT_CACHES,
+// then claim clients so the new SW serves requests on the current page.
+// clients.claim() here is safe because activate only fires either on fresh
+// install (no prior SW) or after the user confirmed the update via SKIP_WAITING.
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('activate', e => {
     e.waitUntil(
@@ -43,7 +49,7 @@ self.addEventListener('activate', e => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MESSAGE
+// MESSAGE — handles SKIP_WAITING (from update toast) and notification polling.
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('message', e => {
     if (e.data?.type === 'SKIP_WAITING') {
@@ -72,7 +78,7 @@ self.addEventListener('message', e => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PUSH
+// PUSH — server-sent push notification
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('push', e => {
     const data = e.data ? e.data.json() : {};
@@ -88,7 +94,7 @@ self.addEventListener('push', e => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NOTIFICATION CLICK
+// NOTIFICATION CLICK — focus existing tab or open a new one
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', e => {
     e.notification.close();
@@ -102,58 +108,62 @@ self.addEventListener('notificationclick', e => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FETCH
+// FETCH — route-based caching strategies
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', e => {
     const req = e.request;
     const url = new URL(req.url);
 
-    // External CDN → StaleWhileRevalidate
+    // ── External CDN (Tailwind) → StaleWhileRevalidate ──────────────────────
     if (url.origin !== location.origin) {
         if (url.host.includes('tailwindcss.com') || url.host.includes('cdn.')) {
             e.respondWith(staleWhileRevalidate(req, SHELL_CACHE));
         }
+        // All other cross-origin: fall through to browser default
         return;
     }
 
-    // Mutations → NetworkOnly (Background Sync can be wired here later)
+    // ── Mutations (POST/PUT/PATCH/DELETE) → NetworkOnly ──────────────────────
+    // Background Sync can be added here in a future step.
     if (req.method !== 'GET') return;
 
-    // Notification polling → always network, never cached
+    // ── Notification polling endpoint → always NetworkOnly ───────────────────
     if (url.pathname === '/notifications/unread') return;
 
-    // /build/* Vite hashed assets → CacheFirst, 30-day TTL
+    // ── Vite hashed assets (/build/*) → CacheFirst, 30-day TTL ──────────────
+    // These filenames contain a hash so they are safe to cache indefinitely.
     if (url.pathname.startsWith('/build/')) {
         e.respondWith(cacheFirst(req, ASSET_CACHE, 30 * 24 * 3600));
         return;
     }
 
-    // Static assets (images, fonts) → CacheFirst, 7-day TTL
+    // ── Static assets (images, fonts, icons) → CacheFirst, 7-day TTL ────────
     if (/\.(png|jpe?g|gif|svg|ico|webp|woff2?)(\?.*)?$/.test(url.pathname)) {
         e.respondWith(cacheFirst(req, ASSET_CACHE, 7 * 24 * 3600));
         return;
     }
 
-    // App data routes → NetworkFirst, 5 s timeout, 24 h stale fallback
-    // NOTE: /api/v1/student/* does not exist in this app; routes are /student/*
+    // ── App data routes → NetworkFirst, 5 s timeout, 24 h stale fallback ─────
+    // NOTE: your routes are /student/*, /officer/*, /admin/* — not /api/v1/*.
+    // Update this list if you add an API prefix in future.
     if (
-        url.pathname.startsWith('/student/')     ||
-        url.pathname.startsWith('/officer/')     ||
-        url.pathname.startsWith('/admin/')       ||
-        url.pathname.startsWith('/profile')      ||
+        url.pathname.startsWith('/student/') ||
+        url.pathname.startsWith('/officer/') ||
+        url.pathname.startsWith('/admin/')   ||
+        url.pathname.startsWith('/profile')  ||
         url.pathname.startsWith('/notifications')
     ) {
         e.respondWith(networkFirst(req, DATA_CACHE, 5000, 24 * 3600));
         return;
     }
 
-    // Navigation (full page loads) → NetworkFirst, offline fallback
+    // ── Navigation requests (HTML pages) → NetworkFirst, offline fallback ────
     if (req.mode === 'navigate') {
         e.respondWith(navigateWithFallback(req));
         return;
     }
 
-    // Everything else (login page, layout assets) → StaleWhileRevalidate
+    // ── Everything else (app shell, login page CSS etc.) → StaleWhileRevalidate
     e.respondWith(staleWhileRevalidate(req, SHELL_CACHE));
 });
 
@@ -171,7 +181,7 @@ async function cacheFirst(req, cacheName, maxAgeSec) {
             ? (Date.now() - new Date(dateHeader).getTime()) / 1000
             : 0;
         if (!maxAgeSec || age < maxAgeSec) return cached;
-        // Stale: serve cached, refresh in background
+        // Stale: serve cached copy, refresh in background
         fetch(req).then(r => { if (r.ok) cache.put(req, r.clone()); }).catch(() => {});
         return cached;
     }
@@ -199,16 +209,19 @@ async function networkFirst(req, cacheName, timeoutMs, maxAgeSec) {
     const cache = await caches.open(cacheName);
 
     try {
-        const ctrl  = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-        const res   = await fetch(req, { signal: ctrl.signal });
+        const ctrl    = new AbortController();
+        const timer   = setTimeout(() => ctrl.abort(), timeoutMs);
+        const res     = await fetch(req, { signal: ctrl.signal });
         clearTimeout(timer);
         if (res.ok) cache.put(req, res.clone());
         return res;
     } catch {
         const cached = await cache.match(req);
-        if (cached) return cached;
-        throw new Error('networkFirst: timed out and no cached response');
+        if (cached) {
+            // Optionally check staleness here (maxAgeSec)
+            return cached;
+        }
+        throw new Error('networkFirst: network timed out and no cache entry');
     }
 }
 

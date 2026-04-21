@@ -14,8 +14,11 @@
         <p style="font-size:11px;color:rgba(209,250,229,0.75);margin-top:3px;">Mbeya University of Science and Technology</p>
     </div>
 
-    <form method="POST" action="{{ route('student.clearances.store') }}" style="padding:26px;">
+    <form id="clearance-form" method="POST" action="{{ route('student.clearances.store') }}" style="padding:26px;">
         @csrf
+
+        {{-- Offline status indicator — shown/hidden by offline-form.js --}}
+        <div id="offline-status" style="display:none;"></div>
 
         @if($errors->any())
         <div style="background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:20px;">
