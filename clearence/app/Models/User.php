@@ -26,6 +26,9 @@ class User extends Authenticatable
         'gender', 'birth_date', 'nationality', 'disability',
         'department_id', 'password', 'is_active', 'sims_synced_at',
         'notification_preferences',
+        'timezone',
+        'quiet_hours_start',
+        'quiet_hours_end',
     ];
 
     /**
@@ -51,7 +54,7 @@ class User extends Authenticatable
             'birth_date'                 => 'date',
             'password'                   => 'hashed',
             'is_active'                  => 'boolean',
-            'notification_preferences'   => 'array',
+            'notification_preferences' => 'array',
         ];
     }
 

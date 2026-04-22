@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ClearanceController as AdminClearanceController;
 use App\Http\Controllers\Admin\SIMSController;
 use App\Http\Controllers\Admin\PwaDebugController;
+use App\Http\Controllers\Admin\PushCampaignController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\PendingSyncController;
@@ -80,6 +81,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->name('clearances.override');
     // PWA diagnostics
     Route::get('/debug/pwa', [PwaDebugController::class, 'index'])->name('debug.pwa');
+
+    // Push campaigns
+    Route::get('/push-campaigns',          [PushCampaignController::class, 'index'])->name('push-campaigns.index');
+    Route::get('/push-campaigns/create',   [PushCampaignController::class, 'create'])->name('push-campaigns.create');
+    Route::post('/push-campaigns',         [PushCampaignController::class, 'store'])->name('push-campaigns.store');
+    Route::post('/push-campaigns/preview', [PushCampaignController::class, 'preview'])->name('push-campaigns.preview');
 
     // SIMS Integration
     Route::get('/sims/settings', [SIMSController::class, 'settings'])->name('sims.settings');

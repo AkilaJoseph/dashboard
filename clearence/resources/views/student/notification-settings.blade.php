@@ -125,6 +125,28 @@
         @endif
     </div>
 
+    {{-- ── Quiet hours (display only) ──────────────────────────────────────── --}}
+    <div class="glow-card" style="margin-bottom:18px;">
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#059669;margin-bottom:14px;">Quiet Hours</p>
+        <p style="font-size:13px;color:#475569;margin-bottom:12px;">
+            Push notifications are automatically delayed when they arrive during your quiet window.
+            They will be delivered once the window ends.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            @foreach([
+                ['Timezone',     auth()->user()->timezone          ?? 'Africa/Dar_es_Salaam'],
+                ['Quiet from',   auth()->user()->quiet_hours_start ?? '22:00'],
+                ['Quiet until',  auth()->user()->quiet_hours_end   ?? '06:00'],
+            ] as [$label, $value])
+            <div style="padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;">
+                <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin:0 0 5px;">{{ $label }}</p>
+                <p style="font-size:13px;font-weight:600;color:#1e293b;margin:0;">{{ $value }}</p>
+            </div>
+            @endforeach
+        </div>
+        <p style="font-size:11px;color:#94a3b8;margin-top:10px;">Contact administration to adjust your quiet hours or timezone.</p>
+    </div>
+
     <a href="{{ route('student.dashboard') }}" style="font-size:13px;color:#64748b;text-decoration:none;">&larr; Back to Dashboard</a>
 
 </div>
