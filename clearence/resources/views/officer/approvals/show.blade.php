@@ -103,6 +103,7 @@
 
     <!-- Decision Panel -->
     @if($approval->status === 'pending')
+    <div id="officer-offline-status" style="display:none;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
         <!-- Approve -->
         <div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:12px;padding:20px;">
@@ -112,7 +113,7 @@
                 </div>
                 <h4 style="font-size:14px;font-weight:700;color:#065f46;">Approve Clearance</h4>
             </div>
-            <form method="POST" action="{{ route('officer.approvals.approve', $approval) }}">
+            <form id="approve-form" method="POST" action="{{ route('officer.approvals.approve', $approval) }}">
                 @csrf
                 <div style="margin-bottom:13px;">
                     <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#065f46;margin-bottom:6px;">Comments (Optional)</label>
@@ -131,7 +132,7 @@
                 </div>
                 <h4 style="font-size:14px;font-weight:700;color:#991b1b;">Reject Clearance</h4>
             </div>
-            <form method="POST" action="{{ route('officer.approvals.reject', $approval) }}">
+            <form id="reject-form" method="POST" action="{{ route('officer.approvals.reject', $approval) }}">
                 @csrf
                 <div style="margin-bottom:13px;">
                     <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:6px;">Rejection Reason <span style="color:#ef4444;">*</span></label>

@@ -13,8 +13,10 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ClearanceController as AdminClearanceController;
 use App\Http\Controllers\Admin\SIMSController;
+use App\Http\Controllers\Admin\PwaDebugController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Student\PendingSyncController;
 
 // Public routes
 Route::get('/', function () { return redirect('/login'); });
@@ -39,6 +41,7 @@ Route::middleware('auth')->group(function () {
 // Student routes
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
+    Route::get('/pending-sync', [PendingSyncController::class, 'index'])->name('pending-sync');
 
     // Store route gets idempotency protection for offline draft sync replays.
     // All other resource actions are unchanged.
@@ -71,6 +74,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/clearances/{clearance}', [AdminClearanceController::class, 'show'])->name('clearances.show');
     Route::post('/clearances/{clearance}/approvals/{approval}/override', [AdminClearanceController::class, 'override'])
         ->name('clearances.override');
+    // PWA diagnostics
+    Route::get('/debug/pwa', [PwaDebugController::class, 'index'])->name('debug.pwa');
+
     // SIMS Integration
     Route::get('/sims/settings', [SIMSController::class, 'settings'])->name('sims.settings');
     Route::post('/sims/settings', [SIMSController::class, 'saveSettings'])->name('sims.settings.save');

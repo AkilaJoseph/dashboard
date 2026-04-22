@@ -48,6 +48,7 @@ async function handleSubmit(e) {
         clearance_type: form.elements['clearance_type']?.value  ?? '',
         reason:         form.elements['reason']?.value          ?? '',
         attachments:    [],   // no file upload field yet
+        csrf_token:     document.querySelector('meta[name="csrf-token"]')?.content ?? '',
     };
 
     // Basic client-side guard — mirror the server's required fields
@@ -57,7 +58,9 @@ async function handleSubmit(e) {
     }
 
     try {
-        await saveDraft(fields);
+        const draftId = await saveDraft(fields);
+        // Register Background Sync (no-op on iOS; window 'online' handles it there)
+        import('./sync-manager.js').then(m => m.registerDraftSync(draftId)).catch(() => {});
         showToast('You\'re offline. Your draft has been saved and will sync automatically when you reconnect.', 'info', 6000);
         setOfflineStatus('saved');
         form.reset();

@@ -125,3 +125,84 @@ async function refreshPendingUI() {
     const { renderPendingDrafts } = await import('./offline-form.js');
     renderPendingDrafts(container);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BACKGROUND SYNC REGISTRATION
+// Call after saving a draft or officer action to IDB.
+//
+// Supported browsers (Chrome/Edge/Android):
+//   Updates status to "pending_sync" and registers the sync tag.
+//   The SW fires the sync event when connectivity is confirmed.
+//
+// iOS Safari (no SyncManager):
+//   Leaves status as "pending" so the window 'online' listener above handles it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const hasBGSync = () =>
+    'serviceWorker' in navigator && 'SyncManager' in window;
+
+/**
+ * Register Background Sync for a student draft.
+ * @param {string} draftId   local UUID from saveDraft()
+ */
+export async function registerDraftSync(draftId) {
+    if (!hasBGSync()) return; // iOS: window 'online' path already handles this
+
+    try {
+        const { updateDraftStatus } = await import('./draft-store.js');
+        await updateDraftStatus(draftId, 'pending_sync');
+
+        const reg = await navigator.serviceWorker.ready;
+        await reg.sync.register('submit-clearance-requests');
+
+        // Store the registration timestamp for the debug page
+        localStorage.setItem('acims_last_sync_registered', new Date().toISOString());
+    } catch (err) {
+        // Sync registration failed (permissions, SW not active, etc.)
+        // Silently fall back: status stays "pending", window 'online' picks it up.
+        console.warn('[sync-manager] BG Sync registration failed, falling back to online listener:', err.message);
+    }
+}
+
+/**
+ * Register Background Sync for an officer approval action.
+ * @param {string} actionId  local UUID from saveOfficerAction()
+ */
+export async function registerOfficerSync(actionId) {
+    if (!hasBGSync()) return;
+
+    try {
+        const { updateOfficerActionStatus } = await import('./draft-store.js');
+        await updateOfficerActionStatus(actionId, 'pending_sync');
+
+        const reg = await navigator.serviceWorker.ready;
+        await reg.sync.register('submit-officer-actions');
+
+        localStorage.setItem('acims_last_officer_sync_registered', new Date().toISOString());
+    } catch (err) {
+        console.warn('[sync-manager] Officer BG Sync registration failed:', err.message);
+    }
+}
+
+// ── Listen for SYNC_COMPLETE messages posted back by the SW ──────────────────
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', async e => {
+        const msg = e.data;
+        if (!msg || msg.type !== 'SYNC_COMPLETE') return;
+
+        localStorage.setItem('acims_last_sync_completed', new Date().toISOString());
+
+        if (msg.success) {
+            showToast(
+                msg.store === 'officer_actions'
+                    ? 'Approval action synced successfully.'
+                    : 'Draft clearance submitted successfully.',
+                'success'
+            );
+        } else if (msg.error) {
+            showToast(`Sync failed: ${msg.error}`, 'error');
+        }
+
+        refreshPendingUI();
+    });
+}

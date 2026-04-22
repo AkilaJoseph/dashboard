@@ -242,3 +242,191 @@ async function navigateWithFallback(req) {
         });
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BACKGROUND SYNC
+// Fires when the browser regains connectivity and a sync tag is pending.
+// Uses raw IndexedDB API — the idb npm library is not available in SW scope.
+//
+// Tags:
+//   "submit-clearance-requests" — student draft clearances (status: pending_sync)
+//   "submit-officer-actions"    — officer approve/reject queued while offline
+//
+// Drafts with status "pending" are handled by the window 'online' path
+// (initSyncManager in sync-manager.js) for iOS Safari which lacks SyncManager.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SW_SYNC_TAG_DRAFTS  = 'submit-clearance-requests';
+const SW_SYNC_TAG_OFFICER = 'submit-officer-actions';
+
+self.addEventListener('sync', e => {
+    if (e.tag === SW_SYNC_TAG_DRAFTS)  e.waitUntil(swSyncDrafts());
+    if (e.tag === SW_SYNC_TAG_OFFICER) e.waitUntil(swSyncOfficerActions());
+});
+
+// ── Raw IDB helpers ───────────────────────────────────────────────────────────
+
+function swIdbOpen() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open('acims-offline', 2);
+        req.onerror   = () => reject(req.error);
+        req.onsuccess = () => resolve(req.result);
+        req.onupgradeneeded = ev => {
+            const db = ev.target.result;
+            if (!db.objectStoreNames.contains('drafts')) {
+                const s = db.createObjectStore('drafts', { keyPath: 'id' });
+                s.createIndex('status',    'status',          { unique: false });
+                s.createIndex('created_at','created_at',      { unique: false });
+                s.createIndex('idem_key',  'idempotency_key', { unique: true  });
+            }
+            if (!db.objectStoreNames.contains('officer_actions')) {
+                const oa = db.createObjectStore('officer_actions', { keyPath: 'id' });
+                oa.createIndex('status',    'status',          { unique: false });
+                oa.createIndex('created_at','created_at',      { unique: false });
+                oa.createIndex('idem_key',  'idempotency_key', { unique: true  });
+            }
+        };
+    });
+}
+
+function swIdbGetPending(db, storeName) {
+    return new Promise((resolve, reject) => {
+        const req = db.transaction(storeName, 'readonly')
+                      .objectStore(storeName)
+                      .index('status')
+                      .getAll('pending_sync');
+        req.onsuccess = () => resolve(req.result ?? []);
+        req.onerror   = () => reject(req.error);
+    });
+}
+
+function swIdbGetOne(db, storeName, id) {
+    return new Promise((resolve, reject) => {
+        const req = db.transaction(storeName, 'readonly')
+                      .objectStore(storeName)
+                      .get(id);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror   = () => reject(req.error);
+    });
+}
+
+function swIdbPut(db, storeName, record) {
+    return new Promise((resolve, reject) => {
+        const req = db.transaction(storeName, 'readwrite')
+                      .objectStore(storeName)
+                      .put(record);
+        req.onsuccess = () => resolve();
+        req.onerror   = () => reject(req.error);
+    });
+}
+
+function swPostToClients(msg) {
+    return self.clients
+        .matchAll({ type: 'window', includeUncontrolled: true })
+        .then(cs => Promise.all(cs.map(c => c.postMessage(msg))));
+}
+
+// ── Clearance draft sync ──────────────────────────────────────────────────────
+
+async function swSyncDrafts() {
+    const db     = await swIdbOpen();
+    const drafts = await swIdbGetPending(db, 'drafts');
+
+    for (const draft of drafts) {
+        await swIdbPut(db, 'drafts', { ...draft, status: 'syncing' });
+
+        try {
+            const body = new FormData();
+            body.append('_token',         draft.csrf_token    ?? '');
+            body.append('academic_year',  draft.academic_year ?? '');
+            body.append('semester',       draft.semester       ?? '');
+            body.append('clearance_type', draft.clearance_type ?? '');
+            if (draft.reason) body.append('reason', draft.reason);
+
+            const res = await fetch('/student/clearances', {
+                method:      'POST',
+                credentials: 'include',
+                headers: {
+                    'X-Idempotency-Key': draft.idempotency_key,
+                    'X-Requested-With':  'XMLHttpRequest',
+                },
+                body,
+                redirect: 'follow',
+            });
+
+            if (res.ok || res.redirected) {
+                await swIdbPut(db, 'drafts', { ...draft, status: 'synced', error: null });
+                await swPostToClients({ type: 'SYNC_COMPLETE', store: 'drafts', id: draft.id, success: true });
+            } else if (res.status === 422) {
+                // Validation error — don't retry, mark permanently failed
+                await swIdbPut(db, 'drafts', { ...draft, status: 'failed', error: `Validation error (${res.status})` });
+                await swPostToClients({ type: 'SYNC_COMPLETE', store: 'drafts', id: draft.id, success: false, error: `HTTP ${res.status}` });
+            } else {
+                const errMsg = `HTTP ${res.status}`;
+                await swIdbPut(db, 'drafts', { ...draft, status: 'pending_sync', error: errMsg });
+                await swPostToClients({ type: 'SYNC_COMPLETE', store: 'drafts', id: draft.id, success: false, error: errMsg });
+                throw new Error(errMsg); // signal browser to retry the sync tag
+            }
+        } catch (err) {
+            const current = await swIdbGetOne(db, 'drafts', draft.id);
+            if (current?.status === 'syncing') {
+                await swIdbPut(db, 'drafts', { ...draft, status: 'pending_sync', error: err.message });
+            }
+            db.close();
+            throw err;
+        }
+    }
+    db.close();
+}
+
+// ── Officer action sync ───────────────────────────────────────────────────────
+
+async function swSyncOfficerActions() {
+    const db      = await swIdbOpen();
+    const actions = await swIdbGetPending(db, 'officer_actions');
+
+    for (const action of actions) {
+        await swIdbPut(db, 'officer_actions', { ...action, status: 'syncing' });
+
+        const url = `/officer/approvals/${action.approval_id}/${action.action}`;
+
+        try {
+            const body = new FormData();
+            body.append('_token', action.csrf_token ?? '');
+            if (action.comments) body.append('comments', action.comments);
+
+            const res = await fetch(url, {
+                method:      'POST',
+                credentials: 'include',
+                headers: {
+                    'X-Idempotency-Key': action.idempotency_key,
+                    'X-Requested-With':  'XMLHttpRequest',
+                },
+                body,
+                redirect: 'follow',
+            });
+
+            if (res.ok || res.redirected) {
+                await swIdbPut(db, 'officer_actions', { ...action, status: 'synced', error: null });
+                await swPostToClients({ type: 'SYNC_COMPLETE', store: 'officer_actions', id: action.id, success: true });
+            } else {
+                // 419 = session expired; 422 = validation; neither should be retried
+                const errMsg = res.status === 419
+                    ? 'Session expired — reload the page and try again'
+                    : `HTTP ${res.status}`;
+                const nextStatus = (res.status === 419 || res.status === 422) ? 'failed' : 'pending_sync';
+                await swIdbPut(db, 'officer_actions', { ...action, status: nextStatus, error: errMsg });
+                await swPostToClients({ type: 'SYNC_COMPLETE', store: 'officer_actions', id: action.id, success: false, error: errMsg });
+                if (nextStatus === 'pending_sync') throw new Error(errMsg);
+            }
+        } catch (err) {
+            const current = await swIdbGetOne(db, 'officer_actions', action.id);
+            if (current?.status === 'syncing') {
+                await swIdbPut(db, 'officer_actions', { ...action, status: 'pending_sync', error: err.message });
+            }
+            db.close();
+            throw err;
+        }
+    }
+    db.close();
+}
