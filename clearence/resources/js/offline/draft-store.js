@@ -2,10 +2,11 @@
  * draft-store.js
  *
  * IndexedDB CRUD for offline clearance drafts and officer approval actions.
- * DB: "acims-offline"  version: 2
+ * DB: "acims-offline"  version: 3
  * Object stores:
  *   "drafts"          — student clearance request drafts
  *   "officer_actions" — officer approve/reject actions queued while offline
+ *   "qr_cache"        — latest QR token for offline display (key "latest")
  *
  * Draft shape:
  * {
@@ -40,9 +41,10 @@
 import { openDB } from 'idb';
 
 const DB_NAME    = 'acims-offline';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE      = 'drafts';
 const STORE_OA   = 'officer_actions';
+const STORE_QR   = 'qr_cache';
 
 function getDB() {
     return openDB(DB_NAME, DB_VERSION, {
@@ -59,6 +61,11 @@ function getDB() {
                     oa.createIndex('status',    'status',           { unique: false });
                     oa.createIndex('created_at','created_at',       { unique: false });
                     oa.createIndex('idem_key',  'idempotency_key',  { unique: true  });
+                }
+            }
+            if (oldVersion < 3) {
+                if (!db.objectStoreNames.contains(STORE_QR)) {
+                    db.createObjectStore(STORE_QR, { keyPath: 'key' });
                 }
             }
         },
@@ -220,4 +227,44 @@ export async function markOfficerActionSynced(id) {
     const record = await db.get(STORE_OA, id);
     if (!record) return;
     await db.put(STORE_OA, { ...record, status: 'synced', error: null });
+}
+
+// ── QR token cache ────────────────────────────────────────────────────────────
+
+/**
+ * Persist the latest QR token for offline display.
+ * Stored with a 1-hour absolute expiry so the card can be shown offline
+ * even after the 5-minute JWT has expired.
+ *
+ * @param {object} data  { token, qr_svg, expires_at, clearance_id }
+ */
+export async function saveQrToken(data) {
+    const db = await getDB();
+    await db.put(STORE_QR, {
+        key:          'latest',
+        token:        data.token,
+        qr_svg:       data.qr_svg,
+        expires_at:   data.expires_at,
+        clearance_id: data.clearance_id,
+        cached_at:    new Date().toISOString(),
+        // Hard cap: do not show cached QR longer than 1 hour from issuance
+        display_until: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    });
+}
+
+/**
+ * Retrieve the cached QR token.
+ * Returns null if nothing cached or the 1-hour display window has passed.
+ *
+ * @returns {Promise<object|null>}
+ */
+export async function getCachedQrToken() {
+    const db   = await getDB();
+    const row  = await db.get(STORE_QR, 'latest');
+    if (!row) return null;
+    if (new Date(row.display_until) < new Date()) {
+        await db.delete(STORE_QR, 'latest');
+        return null;
+    }
+    return row;
 }

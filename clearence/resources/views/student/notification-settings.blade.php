@@ -153,7 +153,7 @@
 
 <script type="module">
 import { isSupported, getPermissionState, requestPermission, subscribe, unsubscribe }
-    from '/build/push/subscribe.js';
+    from '{{ Vite::asset('resources/js/push/subscribe.js') }}';
 
 const btn    = document.getElementById('btn-subscribe');
 const status = document.getElementById('push-status');

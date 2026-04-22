@@ -19,6 +19,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\PendingSyncController;
 use App\Http\Controllers\Student\NotificationSettingsController;
+use App\Http\Controllers\Student\StudentCardController;
+use App\Http\Controllers\Officer\DepartmentScanController;
 
 // Public routes
 Route::get('/', function () { return redirect('/login'); });
@@ -48,6 +50,8 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::patch('/notification-settings', [NotificationSettingsController::class, 'update'])->name('notification-settings.update');
     Route::post('/notification-settings/remove-device', [NotificationSettingsController::class, 'removeDevice'])->name('notification-settings.remove-device');
 
+    Route::get('/my-card', [StudentCardController::class, 'show'])->name('my-card');
+
     // Store route gets idempotency protection for offline draft sync replays.
     // All other resource actions are unchanged.
     Route::post('/clearances', [ClearanceController::class, 'store'])
@@ -62,6 +66,7 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
 // Officer routes
 Route::middleware(['auth', 'role:officer'])->prefix('officer')->name('officer.')->group(function () {
     Route::get('/dashboard', [OfficerDashboard::class, 'index'])->name('dashboard');
+    Route::get('/scan',      [DepartmentScanController::class, 'show'])->name('scan');
     Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
     Route::get('/approvals/{approval}', [ApprovalController::class, 'show'])->name('approvals.show');
     Route::post('/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
