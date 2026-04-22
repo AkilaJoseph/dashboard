@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \Illuminate\Support\Facades\Notification::extend(
+            'webpush',
+            fn ($app) => $app->make(\App\Notifications\Channels\WebPushChannel::class)
+        );
     }
 }

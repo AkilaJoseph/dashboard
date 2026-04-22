@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->hasMany(ClearanceApproval::class, 'officer_id');
     }
 
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(\App\Models\PushSubscription::class);
+    }
+
     // Helper methods
     public function isStudent()
     {
