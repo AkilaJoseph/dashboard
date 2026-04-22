@@ -25,6 +25,7 @@ class User extends Authenticatable
         'year_of_study', 'entry_year', 'entry_category',
         'gender', 'birth_date', 'nationality', 'disability',
         'department_id', 'password', 'is_active', 'sims_synced_at',
+        'notification_preferences',
     ];
 
     /**
@@ -45,11 +46,12 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'sims_synced_at'    => 'datetime',
-            'birth_date'        => 'date',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
+            'email_verified_at'          => 'datetime',
+            'sims_synced_at'             => 'datetime',
+            'birth_date'                 => 'date',
+            'password'                   => 'hashed',
+            'is_active'                  => 'boolean',
+            'notification_preferences'   => 'array',
         ];
     }
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PwaDebugController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\PendingSyncController;
+use App\Http\Controllers\Student\NotificationSettingsController;
 
 // Public routes
 Route::get('/', function () { return redirect('/login'); });
@@ -42,6 +43,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
     Route::get('/pending-sync', [PendingSyncController::class, 'index'])->name('pending-sync');
+    Route::get('/notification-settings', [NotificationSettingsController::class, 'index'])->name('notification-settings');
+    Route::patch('/notification-settings', [NotificationSettingsController::class, 'update'])->name('notification-settings.update');
+    Route::post('/notification-settings/remove-device', [NotificationSettingsController::class, 'removeDevice'])->name('notification-settings.remove-device');
 
     // Store route gets idempotency protection for offline draft sync replays.
     // All other resource actions are unchanged.

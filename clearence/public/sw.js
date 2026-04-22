@@ -76,13 +76,29 @@ self.addEventListener('message', e => {
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('push', e => {
     const data = e.data ? e.data.json() : {};
+
+    const title   = data.title  || 'ACIMS — MUST';
+    const body    = data.body   || data.message || 'You have a new notification.';
+    const url     = data.url    || '/';
+    const icon    = data.icon   || '/images/pwa-icons/icon-192.png';
+    const badge   = data.badge  || '/images/pwa-icons/icon-96.png';
+    const tag     = data.clearance_id ? `clearance-${data.clearance_id}` : 'acims-notif';
+    const isFinal = data.require_interaction === true;
+
     e.waitUntil(
-        self.registration.showNotification(data.title || 'ACIMS — MUST', {
-            body:    data.message || 'You have a new notification.',
-            icon:    '/images/pwa-icons/icon-192.png',
-            badge:   '/images/pwa-icons/icon-96.png',
-            data:    { url: data.url || '/' },
-            vibrate: [200, 100, 200],
+        self.registration.showNotification(title, {
+            body,
+            icon,
+            badge,
+            tag,
+            renotify:           true,
+            requireInteraction: isFinal,
+            vibrate:            isFinal ? [300, 100, 300, 100, 300] : [200, 100, 200],
+            data:               { url },
+            actions: [
+                { action: 'view',    title: 'View' },
+                { action: 'dismiss', title: 'Dismiss' },
+            ],
         })
     );
 });
@@ -92,11 +108,20 @@ self.addEventListener('push', e => {
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', e => {
     e.notification.close();
+
+    if (e.action === 'dismiss') return;
+
     const target = e.notification.data?.url || '/';
+
     e.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
-            const match = cs.find(c => c.url.includes(location.origin));
-            return match ? match.focus() : clients.openWindow(target);
+            const exact = cs.find(c => c.url === location.origin + target);
+            if (exact) return exact.focus();
+
+            const any = cs.find(c => c.url.startsWith(location.origin));
+            if (any) return any.focus().then(() => any.navigate(target));
+
+            return clients.openWindow(target);
         })
     );
 });

@@ -78,31 +78,75 @@ self.addEventListener('message', e => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PUSH — server-sent push notification
+// PUSH — rich server-sent push notification
+//
+// Expected payload (from DepartmentApprovalNotification.toWebPush):
+//   { title, body, url, clearance_id, status, require_interaction, icon, badge }
+//
+// Tag: "clearance-{id}" — subsequent pushes for the same clearance silently
+// replace the prior notification so the student always sees the latest status.
+//
+// require_interaction: true only when the whole clearance reaches a terminal
+// state ('approved'/'rejected'); false for intermediate department approvals.
+//
+// Actions note: "approve" action is intentionally absent. Push notifications
+// are delivered to students, not officers — students cannot approve their own
+// clearance. A future OfficerPendingNotification could add that action.
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('push', e => {
     const data = e.data ? e.data.json() : {};
+
+    const title   = data.title  || 'ACIMS — MUST';
+    const body    = data.body   || data.message || 'You have a new notification.';
+    const url     = data.url    || '/';
+    const icon    = data.icon   || '/images/pwa-icons/icon-192.png';
+    const badge   = data.badge  || '/images/pwa-icons/icon-96.png';
+    const tag     = data.clearance_id ? `clearance-${data.clearance_id}` : 'acims-notif';
+    const isFinal = data.require_interaction === true;
+
     e.waitUntil(
-        self.registration.showNotification(data.title || 'ACIMS — MUST', {
-            body:    data.message || 'You have a new notification.',
-            icon:    '/images/pwa-icons/icon-192.png',
-            badge:   '/images/pwa-icons/icon-96.png',
-            data:    { url: data.url || '/' },
-            vibrate: [200, 100, 200],
+        self.registration.showNotification(title, {
+            body,
+            icon,
+            badge,
+            tag,
+            renotify:             true,
+            requireInteraction:   isFinal,
+            vibrate:              isFinal ? [300, 100, 300, 100, 300] : [200, 100, 200],
+            data:                 { url },
+            actions: [
+                { action: 'view',    title: 'View' },
+                { action: 'dismiss', title: 'Dismiss' },
+            ],
         })
     );
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NOTIFICATION CLICK — focus existing tab or open a new one
+// NOTIFICATION CLICK — navigate to the notification's URL
+//
+// action='view' or default click: open/focus the app at data.url.
+// action='dismiss': close only (no navigation).
 // ─────────────────────────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', e => {
     e.notification.close();
+
+    if (e.action === 'dismiss') return;
+
     const target = e.notification.data?.url || '/';
+
     e.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
-            const match = cs.find(c => c.url.includes(location.origin));
-            return match ? match.focus() : clients.openWindow(target);
+            // Prefer a tab already at the target URL
+            const exact = cs.find(c => c.url === location.origin + target);
+            if (exact) return exact.focus();
+
+            // Otherwise focus any open tab and navigate it there
+            const any = cs.find(c => c.url.startsWith(location.origin));
+            if (any) return any.focus().then(() => any.navigate(target));
+
+            // No open tab — open a new one
+            return clients.openWindow(target);
         })
     );
 });

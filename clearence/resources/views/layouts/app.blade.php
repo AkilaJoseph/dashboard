@@ -18,6 +18,7 @@
     <meta name="msapplication-TileImage" content="/images/pwa-icons/icon-144.png">
     <meta name="msapplication-TileColor" content="#064e3b">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="vapid-public-key" content="{{ config('services.webpush.public_key', '') }}">
     @php try { @endphp
     @vite(['resources/js/app.js'])
     @php } catch (\Throwable $e) { /* Vite not built yet — run: npm run dev */ } @endphp
