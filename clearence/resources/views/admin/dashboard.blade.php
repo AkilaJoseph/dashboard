@@ -147,6 +147,8 @@
 
 </div>
 
+@include('admin.partials.bottleneck-widget')
+
 <!-- Recent Clearances -->
 <div class="glow-card" style="padding:0;overflow:hidden;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">

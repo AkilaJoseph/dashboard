@@ -230,6 +230,11 @@
         </div>
     </div>
 
+    {{-- Prediction widget: only while clearance is not yet finalised --}}
+    @if(in_array($clearance->status, ['pending', 'in_progress']))
+        @include('student.clearances.partials.prediction-widget')
+    @endif
+
     {{-- ══ Department Cards ══ --}}
     <div class="glow-card card-anim" style="margin-bottom:18px;animation-delay:0.1s;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #f1f5f9;">

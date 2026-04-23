@@ -23,6 +23,7 @@ use App\Http\Controllers\Student\StudentCardController;
 use App\Http\Controllers\Officer\DepartmentScanController;
 use App\Http\Controllers\CertificateVerifyController;
 use App\Http\Controllers\Admin\LedgerController;
+use App\Http\Controllers\Admin\BottleneckReminderController;
 use App\Http\Controllers\LocaleController;
 
 // Public routes
@@ -109,4 +110,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Certificate ledger
     Route::get('/ledger',              [LedgerController::class, 'index'])->name('ledger.index');
     Route::get('/ledger/verify-chain', [LedgerController::class, 'verifyChain'])->name('ledger.verify-chain');
+
+    // Bottleneck reminder push
+    Route::post('/bottleneck/{department}/remind', [BottleneckReminderController::class, 'send'])
+        ->name('admin.bottleneck.remind');
 });
