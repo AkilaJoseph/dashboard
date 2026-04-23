@@ -21,10 +21,13 @@ use App\Http\Controllers\Student\PendingSyncController;
 use App\Http\Controllers\Student\NotificationSettingsController;
 use App\Http\Controllers\Student\StudentCardController;
 use App\Http\Controllers\Officer\DepartmentScanController;
+use App\Http\Controllers\CertificateVerifyController;
+use App\Http\Controllers\Admin\LedgerController;
 
 // Public routes
 Route::get('/', function () { return redirect('/login'); });
 Route::get('/offline', fn() => view('offline'))->name('offline');
+Route::get('/verify/{clearance}', [CertificateVerifyController::class, 'show'])->name('verify');
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -100,4 +103,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/sims/fetch', [SIMSController::class, 'fetchStudent'])->name('sims.fetch');
     Route::post('/sims/import', [SIMSController::class, 'importStudent'])->name('sims.import');
     Route::post('/sims/resync/{user}', [SIMSController::class, 'resync'])->name('sims.resync');
+
+    // Certificate ledger
+    Route::get('/ledger',              [LedgerController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/verify-chain', [LedgerController::class, 'verifyChain'])->name('ledger.verify-chain');
 });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Clearance;
 use App\Models\ClearanceApproval;
+use App\Models\CertificateLedger;
 use App\Models\Department;
 use Barryvdh\DomPDF\Facade\Pdf;
 use chillerlan\QRCode\QRCode;
@@ -90,14 +91,25 @@ class ClearanceController extends Controller
             . '/' . str_pad($clearance->id, 5, '0', STR_PAD_LEFT)
             . '/' . $clearance->submitted_at?->format('Ymd');
 
+        $ledger = CertificateLedger::where('clearance_id', $clearance->id)->first();
+
+        // QR encodes the public verify URL with ledger fingerprint when available,
+        // falling back to the plain reference code for certificates issued before
+        // the ledger was introduced.
+        $qrPayload = $ledger
+            ? url('/verify/' . $clearance->id)
+              . '?seq=' . $ledger->sequence
+              . '&h='   . substr($ledger->certificate_hash, 0, 16)
+            : $verificationCode;
+
         $options = new QROptions([
             'outputInterface' => QRMarkupSVG::class,
             'outputBase64'    => false,
             'scale'           => 4,
         ]);
-        $qrCode = (new QRCode($options))->render($verificationCode);
+        $qrCode = (new QRCode($options))->render($qrPayload);
 
-        $pdf = Pdf::loadView('student.clearances.certificate_pdf', compact('clearance', 'verificationCode', 'qrCode'))
+        $pdf = Pdf::loadView('student.clearances.certificate_pdf', compact('clearance', 'verificationCode', 'qrCode', 'ledger'))
             ->setPaper('a4', 'portrait');
 
         $safeId   = str_replace(['/', '\\', ' '], '_', $clearance->user->student_id ?? 'STU');

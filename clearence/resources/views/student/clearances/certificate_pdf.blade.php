@@ -169,6 +169,18 @@
         .footer-text { font-size: 7.5pt; color: #64748b; line-height: 1.7; }
         .footer-note { font-size: 7pt; color: #94a3b8; margin-top: 6px; font-style: italic; }
 
+        /* ── Ledger integrity strip ── */
+        .ledger-strip {
+            font-family: 'DejaVu Sans Mono', 'Courier New', monospace;
+            font-size: 7pt;
+            color: #475569;
+            border-top: 1px dashed #cbd5e1;
+            border-bottom: 1px dashed #cbd5e1;
+            padding: 5px 10px;
+            margin: 14px 0 8px;
+            background: #f8fafc;
+        }
+
         /* ── Watermark ── */
         .watermark {
             position: fixed;
@@ -320,6 +332,19 @@
             @endif
         </table>
     </div>
+
+    {{-- ═══ 4b. LEDGER INTEGRITY STRIP ═══ --}}
+    @if(isset($ledger))
+    <div class="ledger-strip">
+        Ledger&nbsp;#{{ $ledger->sequence }}
+        &nbsp;&middot;&nbsp;
+        Hash:&nbsp;{{ substr($ledger->certificate_hash, 0, 8) }}&hellip;{{ substr($ledger->certificate_hash, -8) }}
+        &nbsp;&middot;&nbsp;
+        Sig:&nbsp;{{ substr($ledger->signature, 0, 8) }}&hellip;
+        &nbsp;&middot;&nbsp;
+        Verify:&nbsp;{{ url('/verify/' . $clearance->id) }}
+    </div>
+    @endif
 
     {{-- ═══ 5. SIGNATURE SECTION ═══ --}}
     <div class="sig-outer">

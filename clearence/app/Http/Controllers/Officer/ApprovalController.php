@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClearanceApproval;
 use App\Models\Clearance;
 use App\Notifications\DepartmentApprovalNotification;
+use App\Services\CertificateLedgerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -58,6 +59,12 @@ class ApprovalController extends Controller
         ]);
 
         $approval->clearance->updateOverallStatus();
+
+        if ($approval->clearance->status === 'approved') {
+            $approval->clearance->load('user', 'approvals.department', 'approvals.officer');
+            app(CertificateLedgerService::class)->append($approval->clearance);
+        }
+
         $approval->clearance->user->notify(new DepartmentApprovalNotification($approval));
 
         return redirect()->route('officer.approvals.index')

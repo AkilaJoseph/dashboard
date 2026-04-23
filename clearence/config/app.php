@@ -99,6 +99,12 @@ return [
 
     'key' => env('APP_KEY'),
 
+    // Separate signing key for the certificate tamper-evident ledger.
+    // Generate: php artisan tinker --execute="echo bin2hex(random_bytes(32));"
+    // Then add: LEDGER_HMAC_KEY=<output>  to .env
+    'ledger_hmac_key'          => env('LEDGER_HMAC_KEY'),
+    'verification_jwt_secret'  => env('VERIFICATION_JWT_SECRET'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
