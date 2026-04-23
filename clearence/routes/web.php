@@ -23,11 +23,13 @@ use App\Http\Controllers\Student\StudentCardController;
 use App\Http\Controllers\Officer\DepartmentScanController;
 use App\Http\Controllers\CertificateVerifyController;
 use App\Http\Controllers\Admin\LedgerController;
+use App\Http\Controllers\LocaleController;
 
 // Public routes
 Route::get('/', function () { return redirect('/login'); });
 Route::get('/offline', fn() => view('offline'))->name('offline');
 Route::get('/verify/{clearance}', [CertificateVerifyController::class, 'show'])->name('verify');
+Route::get('/locale/{locale}',    [LocaleController::class, 'switch'])->name('locale.switch');
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

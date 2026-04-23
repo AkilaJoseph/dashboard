@@ -480,6 +480,24 @@
                     {{ now()->format('d M Y') }}
                 </span>
 
+                <!-- ── Language switcher (top bar variant) ── -->
+                @php $loc = app()->getLocale(); @endphp
+                <div style="display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:7px;overflow:hidden;flex-shrink:0;margin-right:2px;">
+                    <a href="{{ route('locale.switch', 'en') }}"
+                       style="padding:4px 9px;font-size:10px;font-weight:700;letter-spacing:0.05em;text-decoration:none;
+                              background:{{ $loc==='en' ? 'var(--green)' : 'transparent' }};
+                              color:{{ $loc==='en' ? '#fff' : 'var(--text-muted)' }};
+                              transition:background 0.15s;"
+                       title="English">EN</a>
+                    <span style="width:1px;background:var(--border);align-self:stretch;"></span>
+                    <a href="{{ route('locale.switch', 'sw') }}"
+                       style="padding:4px 9px;font-size:10px;font-weight:700;letter-spacing:0.05em;text-decoration:none;
+                              background:{{ $loc==='sw' ? 'var(--green)' : 'transparent' }};
+                              color:{{ $loc==='sw' ? '#fff' : 'var(--text-muted)' }};
+                              transition:background 0.15s;"
+                       title="Kiswahili">SW</a>
+                </div>
+
                 @auth
                 <!-- ── Notification Bell ── -->
                 <div style="position:relative;" id="notif-wrap">

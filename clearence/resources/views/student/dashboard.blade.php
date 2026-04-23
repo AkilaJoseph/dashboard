@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Student Dashboard')
-@section('page-title', 'Student Dashboard')
-@section('page-subtitle', 'Track your clearance progress across all MUST departments')
+@section('title', __('dashboard.page_title'))
+@section('page-title', __('dashboard.page_title'))
+@section('page-subtitle', __('dashboard.page_subtitle'))
 
 @section('content')
 @php $user = auth()->user(); @endphp
@@ -51,13 +51,13 @@
                 <div class="avatar">{{ strtoupper(substr($user->name,0,1)) }}</div>
                 <div>
                     <h2 style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:3px;">{{ $user->name }}</h2>
-                    <p style="font-size:12px;color:#64748b;margin-bottom:8px;">{{ $user->programme ?? 'Programme not set' }}</p>
+                    <p style="font-size:12px;color:#64748b;margin-bottom:8px;">{{ $user->programme ?? __('dashboard.programme_not_set') }}</p>
                     <div style="display:flex;flex-wrap:wrap;gap:6px;">
                         @if($user->student_id)
                         <span style="font-size:10px;font-family:monospace;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:2px 9px;border-radius:999px;font-weight:600;">{{ $user->student_id }}</span>
                         @endif
                         @if($user->registration_number)
-                        <span style="font-size:10px;font-family:monospace;background:#d1fae5;border:1px solid #a7f3d0;color:#065f46;padding:2px 9px;border-radius:999px;font-weight:600;">Reg: {{ $user->registration_number }}</span>
+                        <span style="font-size:10px;font-family:monospace;background:#d1fae5;border:1px solid #a7f3d0;color:#065f46;padding:2px 9px;border-radius:999px;font-weight:600;">{{ __('dashboard.reg_prefix') }}{{ $user->registration_number }}</span>
                         @endif
                         @if($user->college)
                         <span style="font-size:10px;background:#ede9fe;border:1px solid #ddd6fe;color:#4c1d95;padding:2px 9px;border-radius:999px;font-weight:600;">{{ $user->college }}</span>
@@ -70,7 +70,7 @@
             </div>
             <a href="{{ route('student.clearances.create') }}" class="btn-glow" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
                 <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                New Clearance
+                {{ __('dashboard.new_clearance') }}
             </a>
         </div>
     </div>
@@ -83,7 +83,7 @@
     <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
          style="animation-delay:0ms;">
         <div class="flex items-center justify-between">
-            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">Total Requests</p>
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">{{ __('dashboard.stat_total') }}</p>
             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f0fdf4;">
                 <svg class="w-5 h-5" style="color:#059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -94,7 +94,7 @@
         <div>
             <p class="text-4xl font-extrabold text-slate-800 leading-none"
                data-count="{{ $stats['total'] }}">0</p>
-            <p class="text-xs text-slate-400 mt-2">All submitted clearances</p>
+            <p class="text-xs text-slate-400 mt-2">{{ __('dashboard.stat_total_sub') }}</p>
         </div>
         <div class="h-1 w-10 rounded-full" style="background:#059669;opacity:0.2;"></div>
     </div>
@@ -103,7 +103,7 @@
     <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
          style="animation-delay:100ms;">
         <div class="flex items-center justify-between">
-            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">Pending</p>
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">{{ __('dashboard.stat_pending') }}</p>
             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fffbeb;">
                 <svg class="w-5 h-5" style="color:#d97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -114,7 +114,7 @@
         <div>
             <p class="text-4xl font-extrabold text-slate-800 leading-none"
                data-count="{{ $stats['pending'] }}">0</p>
-            <p class="text-xs text-slate-400 mt-2">Awaiting first review</p>
+            <p class="text-xs text-slate-400 mt-2">{{ __('dashboard.stat_pending_sub') }}</p>
         </div>
         <div class="h-1 w-10 rounded-full" style="background:#d97706;opacity:0.2;"></div>
     </div>
@@ -123,7 +123,7 @@
     <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
          style="animation-delay:200ms;">
         <div class="flex items-center justify-between">
-            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">In Progress</p>
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">{{ __('dashboard.stat_in_progress') }}</p>
             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#eff6ff;">
                 <svg class="w-5 h-5" style="color:#3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -134,7 +134,7 @@
         <div>
             <p class="text-4xl font-extrabold text-slate-800 leading-none"
                data-count="{{ $stats['in_progress'] }}">0</p>
-            <p class="text-xs text-slate-400 mt-2">Partially approved</p>
+            <p class="text-xs text-slate-400 mt-2">{{ __('dashboard.stat_in_progress_sub') }}</p>
         </div>
         <div class="h-1 w-10 rounded-full" style="background:#3b82f6;opacity:0.2;"></div>
     </div>
@@ -143,7 +143,7 @@
     <div class="stat-anim bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out p-6 flex flex-col gap-4"
          style="animation-delay:300ms;">
         <div class="flex items-center justify-between">
-            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">Approved</p>
+            <p class="text-xs font-bold tracking-widest uppercase text-slate-400">{{ __('dashboard.stat_approved') }}</p>
             <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#f0fdf4;">
                 <svg class="w-5 h-5" style="color:#10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -154,7 +154,7 @@
         <div>
             <p class="text-4xl font-extrabold text-slate-800 leading-none"
                data-count="{{ $stats['approved'] }}">0</p>
-            <p class="text-xs text-slate-400 mt-2">Fully cleared</p>
+            <p class="text-xs text-slate-400 mt-2">{{ __('dashboard.stat_approved_sub') }}</p>
         </div>
         <div class="h-1 w-10 rounded-full" style="background:#10b981;opacity:0.2;"></div>
     </div>
@@ -167,8 +167,8 @@
 <!-- Recent Clearances -->
 <div class="glow-card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <h3 style="font-size:14px;font-weight:700;color:#1e293b;">Recent Clearance Requests</h3>
-        <a href="{{ route('student.clearances.index') }}" style="font-size:12px;color:#059669;text-decoration:none;font-weight:600;">View all &rarr;</a>
+        <h3 style="font-size:14px;font-weight:700;color:#1e293b;">{{ __('dashboard.recent_clearances') }}</h3>
+        <a href="{{ route('student.clearances.index') }}" style="font-size:12px;color:#059669;text-decoration:none;font-weight:600;">{{ __('dashboard.view_all') }}</a>
     </div>
 
     @if($clearances->isEmpty())
@@ -176,8 +176,8 @@
         <div style="width:52px;height:52px;border-radius:50%;background:#f0fdf4;border:1px solid #a7f3d0;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
             <svg style="width:22px;height:22px;color:#059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         </div>
-        <p style="color:#64748b;font-size:13px;margin-bottom:12px;">No clearance requests yet.</p>
-        <a href="{{ route('student.clearances.create') }}" style="color:#059669;font-size:12px;font-weight:600;text-decoration:none;">Submit your first request &rarr;</a>
+        <p style="color:#64748b;font-size:13px;margin-bottom:12px;">{{ __('dashboard.no_clearances') }}</p>
+        <a href="{{ route('student.clearances.create') }}" style="color:#059669;font-size:12px;font-weight:600;text-decoration:none;">{{ __('dashboard.submit_first') }}</a>
     </div>
     @else
     <div>
@@ -193,13 +193,13 @@
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
                         <span style="font-size:13px;font-weight:600;color:#1e293b;">{{ $clearance->academic_year }} &mdash; {{ $clearance->semester }}</span>
                         @if($clearance->status==='approved')
-                        <span class="badge-approved">Approved</span>
+                        <span class="badge-approved">{{ __('clearance.status_approved') }}</span>
                         @elseif($clearance->status==='rejected')
-                        <span class="badge-rejected">Rejected</span>
+                        <span class="badge-rejected">{{ __('clearance.status_rejected') }}</span>
                         @elseif($clearance->status==='in_progress')
-                        <span class="badge-progress">In Progress</span>
+                        <span class="badge-progress">{{ __('clearance.status_in_progress') }}</span>
                         @else
-                        <span class="badge-pending">Pending</span>
+                        <span class="badge-pending">{{ __('clearance.status_pending') }}</span>
                         @endif
                         <span style="font-size:10px;background:#f1f5f9;border:1px solid #cbd5e1;color:#64748b;padding:2px 8px;border-radius:999px;text-transform:capitalize;">{{ $clearance->clearance_type }}</span>
                     </div>
@@ -207,7 +207,7 @@
                         <div style="flex:1;max-width:200px;background:#e2e8f0;border-radius:999px;height:5px;overflow:hidden;">
                             <div style="height:5px;border-radius:999px;width:{{ $pct }}%;background:{{ $pct===100 ? '#059669' : '#d97706' }};transition:width 1s ease;"></div>
                         </div>
-                        <span style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $approved }}/{{ $total }} depts</span>
+                        <span style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $approved }}/{{ $total }} {{ __('dashboard.depts') }}</span>
                     </div>
                 </div>
                 <div style="margin-left:16px;color:#cbd5e1;">
@@ -222,9 +222,9 @@
 
 <!-- How It Works -->
 <div class="info-panel">
-    <p style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:#065f46;text-transform:uppercase;margin-bottom:14px;">How the Clearance Process Works</p>
+    <p style="font-size:11px;font-weight:700;letter-spacing:0.06em;color:#065f46;text-transform:uppercase;margin-bottom:14px;">{{ __('dashboard.how_it_works') }}</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-        @foreach(['Submit a clearance request specifying the academic year and type.','Each department reviews and approves your request online.','Track progress in real time — no physical office visits required.','Once all departments approve, download your official certificate.'] as $i => $step)
+        @foreach(__('dashboard.steps') as $i => $step)
         <div style="display:flex;gap:10px;align-items:flex-start;">
             <div style="width:22px;height:22px;border-radius:50%;background:#059669;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;">{{ $i+1 }}</div>
             <p style="font-size:12px;color:#374151;line-height:1.55;">{{ $step }}</p>

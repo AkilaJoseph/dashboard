@@ -29,6 +29,7 @@ class User extends Authenticatable
         'timezone',
         'quiet_hours_start',
         'quiet_hours_end',
+        'locale',
     ];
 
     /**
