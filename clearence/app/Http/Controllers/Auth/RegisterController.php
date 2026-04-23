@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -26,7 +27,7 @@ class RegisterController extends Controller
             'programme'           => 'required|string|max:255',
             'college'             => 'required|string|max:255',
             'year_of_study'       => 'required|string|max:50',
-            'password'            => 'required|string|min:6|confirmed',
+            'password'            => ['required', 'string', 'confirmed', new StrongPassword],
         ]);
 
         $user = User::create([

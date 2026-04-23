@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreClearanceRequest;
+use App\Models\Attachment;
 use App\Models\Clearance;
 use App\Models\ClearanceApproval;
 use App\Models\CertificateLedger;
@@ -14,6 +16,7 @@ use chillerlan\QRCode\Output\QRMarkupSVG;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ClearanceController extends Controller
 {
@@ -32,17 +35,9 @@ class ClearanceController extends Controller
         return view('student.clearances.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreClearanceRequest $request)
     {
-        $request->validate([
-            'academic_year'  => 'required|string',
-            'semester'       => 'required|string',
-            'clearance_type' => 'required|in:graduation,semester,withdrawal,transfer',
-            'reason'         => 'nullable|string',
-        ]);
-
         DB::transaction(function () use ($request) {
-            // Create clearance
             $clearance = Auth::user()->clearances()->create([
                 'clearance_type' => $request->clearance_type,
                 'academic_year'  => $request->academic_year,
@@ -52,14 +47,50 @@ class ClearanceController extends Controller
                 'submitted_at'   => now(),
             ]);
 
-            // Create approval records for all active departments
+            // Store reference number now that the id is known.
+            $clearance->update([
+                'reference_no' => 'CLR/' . now()->year . '/' . str_pad($clearance->id, 6, '0', STR_PAD_LEFT),
+            ]);
+
+            // Seed one approval row per active department.
             $departments = Department::where('is_active', true)->get();
             foreach ($departments as $department) {
                 ClearanceApproval::create([
-                    'clearance_id' => $clearance->id,
+                    'clearance_id'  => $clearance->id,
                     'department_id' => $department->id,
-                    'status' => 'pending',
+                    'status'        => 'pending',
                 ]);
+            }
+
+            // Handle uploaded supporting documents.
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    // Second MIME check via finfo — guards against MIME spoofing
+                    // even though the Form Request already validated with mimes:.
+                    $finfo      = new \finfo(FILEINFO_MIME_TYPE);
+                    $actualMime = $finfo->file($file->getRealPath());
+                    $allowed    = ['application/pdf', 'image/jpeg', 'image/png'];
+
+                    if (! in_array($actualMime, $allowed, true)) {
+                        continue;
+                    }
+
+                    $ext        = strtolower($file->getClientOriginalExtension());
+                    $storedPath = Storage::disk('attachments')->putFileAs(
+                        'clearance_' . $clearance->id,
+                        $file,
+                        uniqid('', true) . '.' . $ext
+                    );
+
+                    Attachment::create([
+                        'clearance_id' => $clearance->id,
+                        'file_name'    => $file->getClientOriginalName(),
+                        'stored_path'  => $storedPath,
+                        'mime_type'    => $actualMime,
+                        'size_bytes'   => $file->getSize(),
+                        'uploaded_at'  => now(),
+                    ]);
+                }
             }
         });
 
@@ -69,12 +100,11 @@ class ClearanceController extends Controller
 
     public function show(Clearance $clearance)
     {
-        // Ensure student can only view their own clearances
         if ($clearance->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $clearance->load('approvals.department', 'approvals.officer');
+        $clearance->load('approvals.department', 'approvals.officer', 'attachments');
 
         return view('student.clearances.show', compact('clearance'));
     }
@@ -85,7 +115,11 @@ class ClearanceController extends Controller
             abort(403);
         }
 
-        $clearance->load('user', 'approvals.department', 'approvals.officer');
+        if ($clearance->status !== 'approved') {
+            abort(403, 'Certificate is only available for fully approved clearances.');
+        }
+
+        $clearance->load('user', 'approvals.department', 'approvals.officer', 'finalApprover');
 
         $verificationCode = 'MUST/' . strtoupper(substr($clearance->user->student_id ?? 'STU', 0, 8))
             . '/' . str_pad($clearance->id, 5, '0', STR_PAD_LEFT)
@@ -93,9 +127,6 @@ class ClearanceController extends Controller
 
         $ledger = CertificateLedger::where('clearance_id', $clearance->id)->first();
 
-        // QR encodes the public verify URL with ledger fingerprint when available,
-        // falling back to the plain reference code for certificates issued before
-        // the ledger was introduced.
         $qrPayload = $ledger
             ? url('/verify/' . $clearance->id)
               . '?seq=' . $ledger->sequence

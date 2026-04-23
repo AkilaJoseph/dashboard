@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Department;
+use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -31,7 +32,7 @@ class UserController extends Controller
             'department_id' => 'required_if:role,officer',
             'student_id' => 'required_if:role,student|unique:users,student_id',
             'phone' => 'nullable|string',
-            'password' => 'required|min:6',
+            'password' => ['required', new StrongPassword],
         ]);
 
         User::create([

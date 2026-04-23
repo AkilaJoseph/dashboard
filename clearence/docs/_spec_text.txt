@@ -1,0 +1,551 @@
+
+TECHNICAL SPECIFICATION
+FOR AN AUTOMATED CLEARANCE INFORMATION MANAGEMENT SYSTEM FOR UNIVERSITY STUDENTS
+Developed using PHP (Laravel Framework) and MySQL
+Version 1.0
+
+1. Introduction
+Purpose
+This document defines the technical specification for the Automated Clearance Information Management System (ACIMS), a web-based platform designed to digitise and streamline the student clearance process in higher learning institutions. The system shall provide a centralised platform for students, departmental staff, and administrators to initiate, process, monitor, and finalise clearance requests electronically, replacing the manual, paper-based workflow currently employed in most universities.
+Scope
+The system shall support the following core capabilities:
+Online student registration and authentication.
+Submission and tracking of clearance requests.
+Departmental review, approval, and rejection workflows with comments.
+Administrative oversight, user management, and final clearance certification.
+Generation of downloadable clearance certificates in PDF format.
+Role-based access control for students, departmental staff, and administrators.
+Reporting and analytics on clearance status, turnaround time, and departmental performance.
+2. System Overview
+2.1. Background of the System
+Student clearance is a mandatory procedure undertaken before graduation, inter-semester transition, or withdrawal from a university. It requires students to obtain sign-off from multiple departments—including the library, finance office, hostel management, faculty, and dean of students—to confirm that they have no outstanding obligations. In most universities, this process remains manual: students physically move from one office to another carrying a paper clearance form, which is prone to loss, delay, forgery, and bureaucratic bottlenecks.
+The Automated Clearance Information Management System (ACIMS) proposes a digital alternative that leverages modern web technologies to automate the end-to-end clearance workflow. The platform shall be built using the PHP Laravel framework with a MySQL relational database, ensuring maintainability, security, and scalability.
+2.2. Problem Statement
+The existing manual clearance process suffers from the following shortcomings:
+Excessive time consumption, with students often requiring several days or weeks to complete clearance.
+Loss, damage, or forgery of paper clearance forms.
+Absence of a centralised tracking mechanism, making it difficult for students to monitor progress.
+Limited visibility for administrators regarding departmental performance and bottlenecks.
+High administrative overhead in storing, retrieving, and archiving physical records.
+Lack of accountability when clearance officers misplace or delay requests.
+Consequently, there is a compelling need for an automated, web-based solution that eliminates these inefficiencies and provides a transparent, verifiable, and auditable clearance process.
+2.3. Objectives
+2.3.1. General Objective
+To design and develop a secure, efficient, and user-friendly web-based Automated Clearance Information Management System that enables university students to request, track, and obtain clearance certificates electronically.
+2.3.2. Specific Objectives
+To analyse and document the existing manual clearance process and identify its limitations.
+To design a relational database schema that captures students, departments, clearance requests, and approvals.
+To develop role-based interfaces for students, departmental staff, and administrators using the Laravel framework.
+To implement a workflow engine that routes clearance requests sequentially or in parallel across departments.
+To integrate PDF generation for clearance certificates and reporting modules for administrators.
+To ensure the system enforces robust authentication, authorisation, and data-integrity mechanisms.
+To evaluate the system through unit, integration, and user acceptance testing.
+3. System Architecture
+3.1. Architectural Overview
+The system shall adopt a three-tier client–server architecture built upon the Model–View–Controller (MVC) design pattern provided natively by the Laravel framework. The separation of concerns afforded by MVC improves maintainability, testability, and scalability of the codebase.
+3.1.1. Presentation Tier (Client)
+The presentation tier consists of web pages rendered in the user&apos;s browser. It is built using HTML5, CSS3, JavaScript, and the Blade templating engine, enhanced with Bootstrap for responsive layout and jQuery/Axios for asynchronous interactions.
+3.1.2. Application Tier (Server)
+The application tier hosts the Laravel application, which encapsulates all business logic, routing, request validation, authentication, and workflow orchestration. It exposes both Blade-rendered views and JSON API endpoints.
+3.1.3. Data Tier (Database)
+The data tier is a MySQL relational database that persists user accounts, clearance records, departmental metadata, approval histories, and system logs. The application communicates with the database through Laravel&apos;s Eloquent ORM.
+3.2. MVC Implementation in Laravel
+Models: Eloquent classes (e.g., Student, Department, ClearanceRequest, Approval) that represent database tables and encapsulate data access logic.
+Views: Blade templates (.blade.php) that compose HTML presentation with dynamic data.
+Controllers: Classes in app/Http/Controllers that receive HTTP requests, delegate to services or models, and return responses.
+Routes: Defined in routes/web.php and routes/api.php, mapping URIs to controller actions.
+Middleware: Used to enforce authentication, role-based access, CSRF protection, and request throttling.
+3.3. Technologies Used
+Component
+Technology
+Role in the System
+Server-side Language
+PHP 8.2+
+Core language for application logic.
+Web Framework
+Laravel 10.x
+Provides MVC structure, routing, ORM, authentication, and security.
+Database
+MySQL 8.x
+Relational data storage for all entities and transactions.
+Templating Engine
+Blade
+Renders dynamic HTML views within Laravel.
+Frontend Markup
+HTML5, CSS3
+Structure and styling of the user interface.
+CSS Framework
+Bootstrap 5
+Responsive grid and pre-built components.
+Client Scripting
+JavaScript, jQuery, Axios
+DOM manipulation and asynchronous requests.
+PDF Generation
+DomPDF / Barryvdh
+Generates downloadable clearance certificates.
+QR Code Library
+chillerlan/php-qrcode
+Embeds verification QR codes on certificates.
+Version Control
+Git / GitHub
+Source-code management and collaboration.
+Web Server
+Apache 2.4 or Nginx
+Serves the application over HTTP/HTTPS.
+Development Env.
+XAMPP / Laragon / Docker
+Local development stack.
+
+4. Functional Requirements
+This section describes the behavioural requirements of the system, organised by user module. Each requirement is stated in the form &quot;The system shall…&quot; to reflect a verifiable specification.
+4.1. Student Module
+4.1.1. Registration and Authentication
+The system shall allow prospective students to register an account using their registration number, full name, faculty, programme, and institutional email address.
+The system shall validate the uniqueness of the registration number and email during account creation.
+The system shall require students to set a password that complies with the institution&apos;s password policy (minimum 8 characters, mixed case, numeric, and special character).
+The system shall provide secure login using email or registration number and password.
+The system shall implement a &quot;Forgot Password&quot; mechanism that sends a time-bounded reset link to the student&apos;s registered email address.
+The system shall lock a student account after five consecutive failed login attempts and notify the account holder.
+4.1.2. Profile Management
+The system shall allow students to view and update personal details such as phone number, postal address, and profile picture.
+The system shall restrict modification of academic identifiers (registration number, programme, year of study) to administrators.
+4.1.3. Clearance Request Submission
+The system shall allow authenticated students to initiate a new clearance request by selecting the clearance type (graduation, inter-semester, withdrawal, transfer).
+The system shall automatically attach the list of departments relevant to the selected clearance type.
+The system shall allow students to attach supporting documents (e.g., fee receipts, library return slips) in PDF, JPG, or PNG formats not exceeding 5 MB per file.
+The system shall generate a unique reference number for each submitted clearance request.
+The system shall prevent a student from submitting a new request while another is still in progress.
+4.1.4. Clearance Tracking
+The system shall provide a dashboard showing the real-time status of the student&apos;s active clearance request.
+The system shall display each department&apos;s status as Pending, Approved, or Rejected.
+The system shall display any comments or reasons provided by departmental staff during review.
+The system shall notify the student via in-app alerts and email whenever the status of any department changes.
+4.1.5. Certificate Download
+The system shall enable students to download a PDF clearance certificate once all departments have approved and the administrator has granted final approval.
+The system shall embed a unique QR code on each certificate that links to an online verification page.
+The system shall prevent download of certificates for requests that have not reached the Fully Approved state.
+4.2. Department Module
+4.2.1. Request Inbox
+The system shall present each departmental officer with a dashboard listing all pending clearance requests routed to their department.
+The system shall allow filtering of requests by status, date range, clearance type, and student programme.
+The system shall allow searching by student registration number or name.
+4.2.2. Review and Decision
+The system shall display all relevant student information and attached supporting documents for each request.
+The system shall allow departmental staff to approve or reject a request.
+The system shall require a comment when a request is rejected, stating the reason for rejection.
+The system shall permit optional comments when a request is approved.
+The system shall record the decision, timestamp, and identity of the approving officer in an immutable approval log.
+4.2.3. Departmental Reporting
+The system shall provide each department with summary statistics: total requests, approved, rejected, and average turnaround time.
+The system shall allow departmental officers to export request lists as CSV or PDF for internal records.
+4.3. Administrator Module
+4.3.1. User Management
+The system shall enable administrators to create, view, edit, deactivate, and delete user accounts.
+The system shall allow administrators to reset user passwords and unlock accounts.
+The system shall support bulk student import from a CSV file.
+4.3.2. Department Management
+The system shall allow administrators to create, edit, and deactivate departments.
+The system shall allow administrators to assign or unassign departmental officers to a department.
+The system shall allow administrators to configure the department routing order for each clearance type.
+4.3.3. Final Approval and Certification
+The system shall permit administrators to grant final clearance only after all departmental approvals have been obtained.
+The system shall digitally sign the final certificate with the institution&apos;s stamp and administrator&apos;s name.
+The system shall allow administrators to revoke a previously issued certificate when irregularities are discovered, recording the reason and timestamp.
+4.3.4. System Reporting
+The system shall generate institutional-level reports, including cleared students per faculty, average clearance duration, and rejection trends.
+The system shall support filtering reports by academic year, semester, programme, and department.
+The system shall allow exporting reports in PDF and CSV formats.
+5. Non-Functional Requirements
+5.1. Security
+All data in transit shall be encrypted using TLS 1.2 or higher (HTTPS).
+User passwords shall be hashed using Laravel&apos;s bcrypt implementation with a work factor of at least 10.
+The system shall implement Cross-Site Request Forgery (CSRF) protection on all state-changing requests.
+The system shall sanitise and validate all user input to prevent SQL injection and Cross-Site Scripting (XSS).
+Session tokens shall expire automatically after 30 minutes of inactivity.
+5.2. Performance
+The system shall load any page in under 3 seconds under a load of 200 concurrent users on a 10 Mbps connection.
+Database queries shall be optimised through appropriate indexing on foreign keys and frequently queried fields.
+The system shall employ server-side caching (Redis or file cache) for static reference data such as departments and clearance types.
+5.3. Usability
+The user interface shall be built upon responsive design principles, supporting viewports from 320 px (mobile) to 1920 px (desktop).
+The system shall provide clear, contextual feedback for every user action (e.g., success banners, validation errors).
+The interface shall follow consistent navigation patterns and visual hierarchy across all pages.
+The system shall provide an inline help section and a downloadable user manual.
+5.4. Scalability
+The application shall be stateless at the server tier to permit horizontal scaling behind a load balancer.
+The database schema shall be normalised to the Third Normal Form (3NF) to support growth without structural refactoring.
+The system shall be deployable via Docker containers to facilitate consistent scaling across environments.
+5.5. Reliability and Availability
+The system shall maintain an operational availability of at least 99% during the academic calendar.
+Database backups shall be scheduled daily with a retention period of 30 days.
+The system shall log all critical errors and unhandled exceptions for administrative review.
+5.6. Maintainability
+The source code shall follow the PSR-12 coding standard and Laravel best practices.
+All non-trivial classes and methods shall be documented with PHPDoc comments.
+The codebase shall be managed using Git with a clear branching strategy.
+6. Database Design
+The database is designed following the relational model and normalised to the Third Normal Form (3NF). The following tables constitute the core schema.
+6.1. Table Descriptions
+6.1.1. users
+Stores authentication credentials and role assignments for all system users, including students, departmental staff, and administrators.
+Column
+Type
+Description
+id
+BIGINT (PK)
+Primary key, auto-increment.
+name
+VARCHAR(150)
+Full name of the user.
+email
+VARCHAR(150) UNIQUE
+Institutional email address.
+password
+VARCHAR(255)
+bcrypt-hashed password.
+role
+ENUM
+student | staff | admin.
+department_id
+BIGINT (FK, nullable)
+Department for staff users.
+status
+ENUM
+active | inactive.
+created_at / updated_at
+TIMESTAMP
+Audit timestamps.
+
+6.1.2. students
+Stores academic information linked to a user account with role = student.
+Column
+Type
+Description
+id
+BIGINT (PK)
+Primary key.
+user_id
+BIGINT (FK)
+References users.id.
+registration_no
+VARCHAR(50) UNIQUE
+Student registration number.
+faculty
+VARCHAR(100)
+Faculty name.
+programme
+VARCHAR(150)
+Programme / degree.
+year_of_study
+TINYINT
+Current year of study.
+phone
+VARCHAR(20)
+Contact phone number.
+
+6.1.3. departments
+Represents the organisational units that participate in the clearance workflow.
+Column
+Type
+Description
+id
+BIGINT (PK)
+Primary key.
+name
+VARCHAR(150)
+Department name (e.g., Library, Finance).
+code
+VARCHAR(20) UNIQUE
+Short code (e.g., LIB, FIN).
+description
+TEXT
+Responsibilities of the department.
+is_active
+BOOLEAN
+Indicates if the department is currently active.
+
+6.1.4. clearance_requests
+Represents a single clearance process initiated by a student.
+Column
+Type
+Description
+id
+BIGINT (PK)
+Primary key.
+student_id
+BIGINT (FK)
+References students.id.
+reference_no
+VARCHAR(30) UNIQUE
+System-generated reference.
+clearance_type
+ENUM
+graduation | inter-semester | withdrawal | transfer.
+status
+ENUM
+pending | in_progress | approved | rejected | revoked.
+submitted_at
+TIMESTAMP
+Date and time of submission.
+completed_at
+TIMESTAMP (nullable)
+Date of final approval.
+final_approver_id
+BIGINT (FK, nullable)
+Administrator who granted final approval.
+
+6.1.5. approvals
+Represents the decision of each department on a given clearance request.
+Column
+Type
+Description
+id
+BIGINT (PK)
+Primary key.
+request_id
+BIGINT (FK)
+References clearance_requests.id.
+department_id
+BIGINT (FK)
+References departments.id.
+officer_id
+BIGINT (FK, nullable)
+Staff who made the decision.
+status
+ENUM
+pending | approved | rejected.
+comment
+TEXT (nullable)
+Officer&apos;s remarks.
+decided_at
+TIMESTAMP (nullable)
+Date and time of decision.
+
+6.1.6. attachments
+Stores references to supporting documents uploaded by the student.
+id (BIGINT, PK)
+request_id (BIGINT, FK → clearance_requests.id)
+file_name (VARCHAR)
+file_path (VARCHAR)
+mime_type (VARCHAR)
+uploaded_at (TIMESTAMP)
+6.1.7. notifications
+Stores in-app and email notifications dispatched to users.
+id (BIGINT, PK)
+user_id (BIGINT, FK → users.id)
+message (TEXT)
+type (ENUM: info | success | warning | error)
+is_read (BOOLEAN)
+created_at (TIMESTAMP)
+6.1.8. audit_logs
+Captures critical actions performed across the system for accountability.
+id, user_id, action, entity_type, entity_id, ip_address, created_at.
+6.2. Entity Relationships
+One users record corresponds to at most one students record (1:1, for student users).
+One departments record has many users (1:N, for staff users).
+One students record has many clearance_requests (1:N).
+One clearance_requests record has many approvals—one per participating department (1:N).
+One clearance_requests record has many attachments (1:N).
+One users record (staff) has many approvals (1:N).
+One users record has many notifications (1:N).
+7. System Workflow
+The clearance process follows a defined sequential and parallel workflow:
+7.1. Request Initiation
+The student logs into the system using their credentials.
+The student selects &quot;Apply for Clearance&quot; from their dashboard.
+The student chooses the clearance type (e.g., graduation).
+The system displays the list of departments involved and prompts for required attachments.
+The student uploads supporting documents and submits the request.
+The system creates a clearance_requests record with status = in_progress and seeds one approvals record per department with status = pending.
+The system generates a unique reference number and dispatches a confirmation email to the student.
+7.2. Departmental Review
+Each departmental officer receives an in-app and email notification of a new pending request.
+The officer logs in, opens the request, and reviews the student&apos;s details and attachments.
+The officer either approves (with optional comment) or rejects (with mandatory reason).
+The system updates the corresponding approvals record and notifies the student of the new status.
+7.3. Consolidation and Final Approval
+Once all departments have approved the request, the system marks the clearance_requests status as awaiting_final.
+The administrator receives a notification to perform the final review.
+The administrator inspects the full approval chain and grants final clearance, setting status = approved and completed_at = NOW().
+7.4. Rejection Handling
+If any department rejects the request, the overall status is set to rejected.
+The student is notified of the rejection along with the reason provided by the rejecting department.
+The student may rectify the issue and submit a fresh clearance request; previous records are retained for audit.
+7.5. Certificate Issuance
+Upon final approval, the system renders a PDF clearance certificate containing the student&apos;s details, approval chain, institutional seal, administrator&apos;s signature, and a verification QR code.
+The student can download the certificate from their dashboard indefinitely.
+Third parties can scan the QR code to verify the certificate&apos;s authenticity on a public verification page.
+8. User Roles and Permissions
+Role
+Permissions
+Student
+Register and manage own account; submit clearance requests; upload attachments; track status; view comments; download approved certificates.
+Department Staff
+View requests routed to their department; approve or reject with comments; view departmental statistics; export departmental reports.
+Administrator
+Manage users and departments; configure clearance workflows; grant final approval; revoke certificates; generate institutional reports; view audit logs.
+
+Access control shall be implemented using Laravel Gates and Policies, with middleware enforcing role-based access at the route level. The principle of least privilege shall be applied, such that every user is granted only those permissions strictly required for their function.
+9. API and System Interfaces
+The system shall expose a RESTful JSON API under the /api prefix to support future integration with mobile clients and third-party verification services. The API shall be stateless and protected using Laravel Sanctum for token-based authentication.
+9.1. Representative Endpoints
+Method
+Endpoint
+Description
+POST
+/api/auth/login
+Authenticate a user and issue an access token.
+POST
+/api/auth/logout
+Revoke the current access token.
+GET
+/api/student/profile
+Retrieve the authenticated student&apos;s profile.
+POST
+/api/clearance/requests
+Submit a new clearance request.
+GET
+/api/clearance/requests/{id}
+Retrieve the status of a specific request.
+GET
+/api/department/inbox
+List requests awaiting departmental decision.
+POST
+/api/department/approvals/{id}
+Approve or reject a pending approval.
+GET
+/api/admin/reports
+Retrieve institutional reports.
+GET
+/verify/{reference_no}
+Public endpoint to verify a certificate.
+
+9.2. External Interfaces
+Email Service: SMTP gateway (e.g., institutional mail server or Mailtrap during development) for transactional notifications.
+PDF Engine: DomPDF library for generating clearance certificates.
+QR Code Generator: chillerlan/php-qrcode for generating verification QR codes.
+Authentication Provider: Laravel Sanctum for API token authentication.
+10. Input and Output Design
+10.1. Input Design
+10.1.1. Clearance Request Form
+The clearance request form shall capture the following inputs, each subjected to server-side validation:
+Clearance type (required, enumerated list).
+Academic year and semester (required, drop-down).
+Reason for clearance (optional text area, max 500 characters).
+Supporting attachments (PDF, JPG, PNG; maximum 5 MB per file; maximum 5 files).
+Student declaration checkbox (required).
+10.1.2. Registration Form
+Full name (required, 2–150 characters).
+Registration number (required, matches institutional format).
+Institutional email (required, valid email, unique).
+Faculty, programme, year of study (required drop-downs).
+Phone number (optional, validated format).
+Password and confirmation (required, matches policy).
+10.1.3. Approval / Rejection Form
+Decision (approve or reject, required).
+Comment (optional for approval, mandatory for rejection, maximum 500 characters).
+10.2. Output Design
+10.2.1. Dashboards
+Student dashboard: summary cards showing active request status, departmental progress bar, and latest notifications.
+Department dashboard: list of pending requests, tabular view of decisions made, and performance metrics.
+Administrator dashboard: institutional statistics, charts of cleared students per faculty, and workflow bottlenecks.
+10.2.2. Reports
+Clearance Status Report: list of requests with student name, programme, status per department, and final status.
+Departmental Performance Report: number of requests handled, average turnaround time, and rejection rate.
+Audit Trail Report: chronological list of critical actions, user identifiers, and timestamps.
+10.2.3. Clearance Certificate (PDF)
+The final deliverable for the student is the clearance certificate, which shall contain:
+Institutional logo and letterhead.
+Student&apos;s full name, registration number, faculty, and programme.
+Unique reference number and date of issuance.
+Tabular approval chain listing each department, officer, decision, and date.
+Administrator&apos;s digital signature and institutional seal.
+A verification QR code linking to the public verification endpoint.
+11. Security Considerations
+11.1. Authentication and Authorisation
+The system shall use Laravel&apos;s built-in authentication scaffolding (Laravel Breeze / Fortify) with session-based authentication for web routes and Sanctum tokens for API routes.
+Passwords shall be hashed using bcrypt and never stored or transmitted in plain text.
+Role-based access control shall be enforced through Laravel Gates, Policies, and role-checking middleware.
+The system shall support optional two-factor authentication for administrative accounts.
+11.2. Data Validation
+All incoming requests shall be validated using Laravel Form Requests.
+File uploads shall be validated for MIME type, extension, and size before persistence.
+Uploaded files shall be stored outside the public web root and served through authenticated controller actions.
+11.3. Protection Against Common Attacks
+SQL Injection: prevented by exclusive use of Eloquent ORM and parameterised queries.
+Cross-Site Scripting (XSS): prevented by default escaping of Blade output and sanitisation of user input.
+Cross-Site Request Forgery (CSRF): mitigated by Laravel&apos;s CSRF token middleware on all state-changing forms.
+Session Hijacking: mitigated by HTTPS, HttpOnly and Secure cookie flags, and session regeneration on login.
+Brute Force Attacks: mitigated by rate limiting on the login endpoint and account lockout after repeated failures.
+Mass Assignment: prevented through explicit $fillable and $guarded declarations on Eloquent models.
+Sensitive Data Exposure: addressed by HTTPS, environment-scoped secrets in .env, and encryption of confidential fields with Laravel&apos;s Crypt facade.
+12. Testing Strategy
+Testing shall be conducted at multiple levels to verify both correctness and fitness for purpose.
+12.1. Unit Testing
+Conducted using PHPUnit, shipped with Laravel.
+Tests shall cover individual model methods, validation rules, service classes, and policy logic.
+A code-coverage threshold of at least 70 % shall be targeted for critical business logic.
+12.2. Feature (Integration) Testing
+Conducted using Laravel&apos;s HTTP test helpers to simulate requests end-to-end.
+Scenarios shall include successful clearance submission, departmental approval, rejection, and final certification.
+Tests shall use an isolated SQLite or MySQL test database seeded with fixtures.
+12.3. System Testing
+Conducted on a staging environment that mirrors production.
+Includes functional, performance, and compatibility testing across major browsers (Chrome, Firefox, Edge, Safari) and devices.
+Performance testing shall be carried out using tools such as Apache JMeter to simulate concurrent users.
+12.4. User Acceptance Testing (UAT)
+Conducted with representative users from each role: students, departmental officers, and administrators.
+Scripted test scenarios shall align with the functional requirements.
+Findings shall be documented in a UAT report, and identified defects addressed before final delivery.
+12.5. Security Testing
+Includes vulnerability scanning (e.g., using OWASP ZAP) and manual penetration testing for OWASP Top 10 vulnerabilities.
+Results shall be remediated prior to production deployment.
+13. Deployment Requirements
+13.1. Server Requirements
+13.1.1. Hardware (Minimum Recommended)
+CPU: Dual-core 2.0 GHz or higher.
+RAM: 4 GB (8 GB recommended for production).
+Storage: 40 GB SSD (with provisioning for uploads and backups).
+Network: Stable connection with a public static IP or domain name.
+13.1.2. Software
+Operating System: Ubuntu Server 22.04 LTS (or equivalent Linux distribution).
+Web Server: Apache 2.4 with mod_rewrite, or Nginx 1.22 with PHP-FPM.
+PHP 8.2 or higher with extensions: OpenSSL, PDO, Mbstring, Tokenizer, XML, Ctype, JSON, BCMath, Fileinfo, GD.
+MySQL 8.0 or MariaDB 10.6.
+Composer 2.x (PHP dependency manager).
+Node.js 18.x and npm (for front-end asset compilation).
+SSL/TLS certificate (e.g., via Let&apos;s Encrypt).
+13.2. Installation Steps
+Provision the server and install all prerequisite software listed above.
+Clone the project repository from the Git remote into /var/www/acims.
+Run composer install --no-dev --optimize-autoloader to install PHP dependencies.
+Run npm install &amp;&amp; npm run build to compile front-end assets.
+Copy .env.example to .env and configure database credentials, mail settings, and application URL.
+Run php artisan key:generate to create the application encryption key.
+Create the MySQL database and user, and run php artisan migrate --seed to build the schema and seed reference data.
+Set appropriate filesystem permissions on storage and bootstrap/cache directories.
+Configure the web server virtual host to point to /var/www/acims/public.
+Install and configure the SSL certificate to enforce HTTPS.
+Schedule php artisan schedule:run via cron every minute to handle background tasks such as notifications.
+Verify deployment by accessing the application URL and performing a smoke test with a seeded administrator account.
+14. Future Enhancements
+The following enhancements are proposed for subsequent iterations of the system to broaden its capability and user reach.
+14.1. Email and SMS Notifications
+Extend the notification service to dispatch SMS alerts via providers such as Twilio or Africa&apos;s Talking.
+Offer users granular notification preferences (email, SMS, in-app, or combinations).
+14.2. QR-Code-Based Certificate Verification
+Expose a public verification portal where any party can scan the QR code to confirm the authenticity, issuance date, and current validity of a clearance certificate.
+Display the verification result as a tamper-evident page backed by cryptographic signatures.
+14.3. Mobile Application
+Develop a companion mobile application using Flutter or React Native consuming the existing REST API.
+Provide push notifications, document scanning, and offline draft support.
+14.4. Integration with University Information Systems
+Integrate with the Student Information System (SIS) to synchronise student records automatically.
+Integrate with the Finance Management System to auto-validate outstanding balances in real time.
+Integrate with the Library Management System to auto-validate book returns.
+14.5. Advanced Analytics and Dashboards
+Introduce predictive analytics to forecast clearance bottlenecks per academic cycle.
+Provide interactive dashboards with charts powered by Chart.js or Power BI embedded reports.
+14.6. Artificial Intelligence Assistance
+Deploy a chatbot to answer common student queries regarding clearance status and requirements.
+Use machine learning to detect anomalous approval patterns that may indicate fraud.

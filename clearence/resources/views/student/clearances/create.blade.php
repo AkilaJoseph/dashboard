@@ -14,7 +14,7 @@
         <p style="font-size:11px;color:rgba(209,250,229,0.75);margin-top:3px;">Mbeya University of Science and Technology</p>
     </div>
 
-    <form id="clearance-form" method="POST" action="{{ route('student.clearances.store') }}" style="padding:26px;">
+    <form id="clearance-form" method="POST" action="{{ route('student.clearances.store') }}" enctype="multipart/form-data" style="padding:26px;">
         @csrf
 
         {{-- Offline status indicator — shown/hidden by offline-form.js --}}
@@ -70,6 +70,27 @@
                       placeholder="Provide any additional information relevant to your clearance request (optional)...">{{ old('reason') }}</textarea>
         </div>
 
+        <!-- Supporting Documents -->
+        <div style="margin-bottom:18px;">
+            <label style="display:block;font-size:11px;font-weight:700;color:#374151;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">
+                Supporting Documents
+                <span style="font-size:10px;font-weight:400;text-transform:none;color:#94a3b8;letter-spacing:0;">(optional — up to 5 files)</span>
+            </label>
+            <input type="file" name="files[]" id="clearance-files" multiple
+                   accept=".pdf,.jpg,.jpeg,.png"
+                   class="glow-input"
+                   style="padding:7px 10px;cursor:pointer;"
+                   onchange="updateFileList(this)">
+            <p style="font-size:11px;color:#94a3b8;margin-top:5px;">Accepted: PDF, JPG, PNG &nbsp;&middot;&nbsp; Max 5&nbsp;MB per file &nbsp;&middot;&nbsp; Max 5 files</p>
+            <ul id="file-list" style="list-style:none;padding:0;margin:8px 0 0;"></ul>
+            @error('files')
+                <p style="font-size:11px;color:#dc2626;margin-top:4px;">{{ $message }}</p>
+            @enderror
+            @error('files.*')
+                <p style="font-size:11px;color:#dc2626;margin-top:4px;">{{ $message }}</p>
+            @enderror
+        </div>
+
         <!-- Departments preview -->
         <div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:16px;margin-bottom:24px;">
             <p style="font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">Your request will be reviewed by these departments:</p>
@@ -83,6 +104,22 @@
             </div>
         </div>
 
+        <!-- Declaration -->
+        <div style="background:#f0fdf4;border:1px solid #a7f3d0;border-radius:10px;padding:14px 16px;margin-bottom:22px;">
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                <input type="checkbox" name="declaration" value="1"
+                       {{ old('declaration') ? 'checked' : '' }}
+                       style="width:16px;height:16px;accent-color:#059669;flex-shrink:0;margin-top:2px;">
+                <span style="font-size:12px;color:#374151;line-height:1.6;">
+                    I declare that all information provided in this clearance request is accurate and complete to the best of my knowledge. I understand that providing false information may result in rejection of my clearance or disciplinary action.
+                    <span style="color:#ef4444;font-weight:700;">*</span>
+                </span>
+            </label>
+            @error('declaration')
+                <p style="font-size:11px;color:#dc2626;margin-top:6px;margin-left:26px;">{{ $message }}</p>
+            @enderror
+        </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;padding-top:16px;border-top:1px solid #f1f5f9;">
             <a href="{{ route('student.clearances.index') }}" style="font-size:13px;color:#64748b;text-decoration:none;">&larr; Cancel</a>
             <button type="submit" class="btn-glow">Submit Clearance Request</button>
@@ -91,4 +128,21 @@
 </div>
 
 </div>
+
+@push('scripts')
+<script>
+function updateFileList(input) {
+    const list = document.getElementById('file-list');
+    list.innerHTML = '';
+    const icons = { 'application/pdf': '📄', 'image/jpeg': '🖼', 'image/png': '🖼', 'image/jpg': '🖼' };
+    Array.from(input.files).slice(0, 5).forEach(function(f) {
+        const li = document.createElement('li');
+        li.style.cssText = 'font-size:12px;color:#374151;padding:4px 0;display:flex;align-items:center;gap:6px;';
+        const size = f.size >= 1048576 ? (f.size/1048576).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
+        li.innerHTML = '<span>' + (icons[f.type] || '📎') + '</span><span style="font-weight:600;">' + f.name + '</span><span style="color:#94a3b8;">(' + size + ')</span>';
+        list.appendChild(li);
+    });
+}
+</script>
+@endpush
 @endsection

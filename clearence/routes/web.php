@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PwaDebugController;
 use App\Http\Controllers\Admin\PushCampaignController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Student\AttachmentController;
 use App\Http\Controllers\Student\PendingSyncController;
 use App\Http\Controllers\Student\NotificationSettingsController;
 use App\Http\Controllers\Student\StudentCardController;
@@ -46,6 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/unread', [NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('/notifications/mark-read', [NotificationController::class, 'markRead'])->name('notifications.markRead');
+
+    // Attachment download — authorisation enforced inside the controller.
+    Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download'])->name('attachments.download');
 });
 
 // Student routes

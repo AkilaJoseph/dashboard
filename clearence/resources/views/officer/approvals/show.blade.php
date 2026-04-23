@@ -101,6 +101,9 @@
         @endforeach
     </div>
 
+    {{-- Attachments --}}
+    @include('partials.attachments-list', ['attachments' => $approval->clearance->attachments])
+
     <!-- Decision Panel -->
     @if($approval->status === 'pending')
     <div id="officer-offline-status" style="display:none;"></div>

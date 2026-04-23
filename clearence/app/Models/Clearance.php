@@ -36,6 +36,11 @@ class Clearance extends Model
         return $this->hasMany(ClearanceApproval::class);
     }
 
+    public function attachments()
+    {
+        return $this->hasMany(Attachment::class);
+    }
+
     // Helper methods
     public function isFullyApproved()
     {

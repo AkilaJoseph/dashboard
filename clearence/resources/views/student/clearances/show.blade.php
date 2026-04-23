@@ -289,6 +289,9 @@
         @endforeach
     </div>
 
+    {{-- ══ Attachments ══ --}}
+    @include('partials.attachments-list', ['attachments' => $clearance->attachments])
+
     @if($clearance->reason)
     <div class="glow-card card-anim" style="margin-bottom:18px;animation-delay:0.2s;">
         <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin:0 0 8px;">Student Notes</p>

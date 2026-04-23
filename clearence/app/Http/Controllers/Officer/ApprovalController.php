@@ -35,7 +35,7 @@ class ApprovalController extends Controller
             abort(403);
         }
 
-        $approval->load('clearance.user', 'clearance.approvals.department', 'department');
+        $approval->load('clearance.user', 'clearance.approvals.department', 'clearance.attachments', 'department');
 
         return view('officer.approvals.show', compact('approval'));
     }
