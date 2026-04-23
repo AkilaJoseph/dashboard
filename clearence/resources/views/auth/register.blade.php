@@ -126,8 +126,8 @@
             <p class="section-label">Personal Information</p>
 
             <div style="margin-bottom:14px;">
-                <label class="form-label">Full Name <span style="color:#ef4444;">*</span></label>
-                <input type="text" name="name" value="{{ old('name') }}"
+                <label class="form-label" for="reg_name">Full Name <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="reg_name" name="name" value="{{ old('name') }}"
                     class="form-input {{ $errors->has('name') ? 'error' : '' }}"
                     placeholder="e.g. Daudi Kasimu Juma" required>
                 @error('name')<p class="err-msg">{{ $message }}</p>@enderror
@@ -135,15 +135,15 @@
 
             <div class="grid-2" style="margin-bottom:14px;">
                 <div>
-                    <label class="form-label">Email Address <span style="color:#ef4444;">*</span></label>
-                    <input type="email" name="email" value="{{ old('email') }}"
+                    <label class="form-label" for="reg_email">Email Address <span style="color:#ef4444;">*</span></label>
+                    <input type="email" id="reg_email" name="email" value="{{ old('email') }}"
                         class="form-input {{ $errors->has('email') ? 'error' : '' }}"
                         placeholder="you@must.ac.tz" required>
                     @error('email')<p class="err-msg">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="form-label">Phone Number</label>
-                    <input type="text" name="phone" value="{{ old('phone') }}"
+                    <label class="form-label" for="reg_phone">Phone Number</label>
+                    <input type="text" id="reg_phone" name="phone" value="{{ old('phone') }}"
                         class="form-input"
                         placeholder="+255 7XX XXX XXX">
                 </div>
@@ -156,16 +156,16 @@
 
             <div class="grid-2" style="margin-bottom:14px;">
                 <div>
-                    <label class="form-label">Student ID (UE Number) <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="student_id" value="{{ old('student_id') }}"
+                    <label class="form-label" for="reg_student_id">Student ID (UE Number) <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="reg_student_id" name="student_id" value="{{ old('student_id') }}"
                         class="form-input {{ $errors->has('student_id') ? 'error' : '' }}"
                         placeholder="e.g. UE2021001"
                         style="font-family:monospace;" required>
                     @error('student_id')<p class="err-msg">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="form-label">Registration Number</label>
-                    <input type="text" name="registration_number" value="{{ old('registration_number') }}"
+                    <label class="form-label" for="reg_reg_no">Registration Number</label>
+                    <input type="text" id="reg_reg_no" name="registration_number" value="{{ old('registration_number') }}"
                         class="form-input"
                         placeholder="e.g. 22100934340012"
                         style="font-family:monospace;">
@@ -173,8 +173,8 @@
             </div>
 
             <div style="margin-bottom:14px;">
-                <label class="form-label">Programme <span style="color:#ef4444;">*</span></label>
-                <input type="text" name="programme" value="{{ old('programme') }}"
+                <label class="form-label" for="reg_programme">Programme <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="reg_programme" name="programme" value="{{ old('programme') }}"
                     class="form-input {{ $errors->has('programme') ? 'error' : '' }}"
                     placeholder="e.g. B.Eng Telecommunication Systems" required>
                 @error('programme')<p class="err-msg">{{ $message }}</p>@enderror
@@ -182,8 +182,8 @@
 
             <div class="grid-2" style="margin-bottom:14px;">
                 <div>
-                    <label class="form-label">College <span style="color:#ef4444;">*</span></label>
-                    <select name="college" class="form-input {{ $errors->has('college') ? 'error' : '' }}" required>
+                    <label class="form-label" for="reg_college">College <span style="color:#ef4444;">*</span></label>
+                    <select id="reg_college" name="college" class="form-input {{ $errors->has('college') ? 'error' : '' }}" required>
                         <option value="">Select college…</option>
                         @foreach([
                             'College of Engineering and Technology',
@@ -199,8 +199,8 @@
                     @error('college')<p class="err-msg">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="form-label">Year of Study <span style="color:#ef4444;">*</span></label>
-                    <select name="year_of_study" class="form-input {{ $errors->has('year_of_study') ? 'error' : '' }}" required>
+                    <label class="form-label" for="reg_year">Year of Study <span style="color:#ef4444;">*</span></label>
+                    <select id="reg_year" name="year_of_study" class="form-input {{ $errors->has('year_of_study') ? 'error' : '' }}" required>
                         <option value="">Select year…</option>
                         @foreach(['Year 1','Year 2','Year 3','Year 4','Year 5','Postgraduate'] as $yr)
                         <option value="{{ $yr }}" {{ old('year_of_study') === $yr ? 'selected' : '' }}>{{ $yr }}</option>
@@ -217,15 +217,15 @@
 
             <div class="grid-2" style="margin-bottom:20px;">
                 <div>
-                    <label class="form-label">Password <span style="color:#ef4444;">*</span></label>
-                    <input type="password" name="password"
+                    <label class="form-label" for="reg_password">Password <span style="color:#ef4444;">*</span></label>
+                    <input type="password" id="reg_password" name="password"
                         class="form-input {{ $errors->has('password') ? 'error' : '' }}"
                         placeholder="Min. 6 characters" required>
                     @error('password')<p class="err-msg">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="form-label">Confirm Password <span style="color:#ef4444;">*</span></label>
-                    <input type="password" name="password_confirmation"
+                    <label class="form-label" for="reg_pw_confirm">Confirm Password <span style="color:#ef4444;">*</span></label>
+                    <input type="password" id="reg_pw_confirm" name="password_confirmation"
                         class="form-input"
                         placeholder="Repeat password" required>
                 </div>

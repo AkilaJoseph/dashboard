@@ -181,7 +181,7 @@
 
             <div class="remember">
                 <input type="checkbox" name="remember" id="remember">
-                <span>Keep me signed in</span>
+                <label for="remember">Keep me signed in</label>
             </div>
 
             <button type="submit" class="btn-signin">Sign In to Portal</button>

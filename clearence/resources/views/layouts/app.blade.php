@@ -17,6 +17,7 @@
     <link rel="apple-touch-icon" sizes="128x128" href="/images/pwa-icons/icon-128.png">
     <meta name="msapplication-TileImage" content="/images/pwa-icons/icon-144.png">
     <meta name="msapplication-TileColor" content="#064e3b">
+    <meta name="description" content="MUST Automated Clearance Information Management System — track and manage student departmental clearances online at Mbeya University of Science and Technology.">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="vapid-public-key" content="{{ config('services.webpush.public_key', '') }}">
     @php try { @endphp
@@ -469,7 +470,7 @@
         <!-- Top Bar -->
         <header style="background:var(--white); border-bottom:1px solid var(--border); padding:11px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
             <div>
-                <h2 style="font-size:16px; font-weight:700; color:var(--text); margin:0;">@yield('page-title','Dashboard')</h2>
+                <h1 style="font-size:16px; font-weight:700; color:var(--text); margin:0;">@yield('page-title','Dashboard')</h1>
                 <p style="font-size:11px; color:var(--text-muted); margin:2px 0 0;">@yield('page-subtitle','Mbeya University of Science and Technology')</p>
             </div>
 
@@ -501,7 +502,7 @@
                 @auth
                 <!-- ── Notification Bell ── -->
                 <div style="position:relative;" id="notif-wrap">
-                    <button class="tb-btn" id="notif-btn" onclick="toggleDropdown('notif-dd')" title="Notifications">
+                    <button class="tb-btn" id="notif-btn" onclick="toggleDropdown('notif-dd')" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -525,7 +526,7 @@
 
                 <!-- ── Profile Avatar ── -->
                 <div style="position:relative;" id="profile-wrap">
-                    <button class="tb-btn" onclick="toggleDropdown('profile-dd')" title="Account" style="padding:4px;">
+                    <button class="tb-btn" onclick="toggleDropdown('profile-dd')" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" style="padding:4px;">
                         <div class="profile-avatar">
                             {{ strtoupper(substr(auth()->user()->name,0,1)) }}
                         </div>

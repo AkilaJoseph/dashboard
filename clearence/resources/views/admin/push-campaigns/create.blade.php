@@ -95,7 +95,7 @@
         <p style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#059669;margin-bottom:14px;">Notification Preview</p>
 
         <div style="background:#1e293b;border-radius:12px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;">
-            <img src="/images/pwa-icons/icon-96.png" style="width:40px;height:40px;border-radius:8px;flex-shrink:0;">
+            <img src="/images/pwa-icons/icon-96.png" alt="" role="presentation" style="width:40px;height:40px;border-radius:8px;flex-shrink:0;">
             <div>
                 <p id="prev-title" style="font-size:13px;font-weight:700;color:#f8fafc;margin:0 0 4px;">Campaign Title</p>
                 <p id="prev-body"  style="font-size:12px;color:#94a3b8;margin:0;line-height:1.5;">Your notification body will appear here.</p>
