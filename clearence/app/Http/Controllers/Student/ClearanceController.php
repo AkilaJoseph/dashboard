@@ -100,6 +100,8 @@ class ClearanceController extends Controller
 
     public function show(Clearance $clearance)
     {
+        $this->authorize('view', $clearance);
+        // Authorised by ClearancePolicy@view + explicit ownership check (belt + braces).
         if ($clearance->user_id !== Auth::id()) {
             abort(403);
         }
@@ -111,6 +113,8 @@ class ClearanceController extends Controller
 
     public function downloadCertificate(Clearance $clearance)
     {
+        $this->authorize('downloadCertificate', $clearance);
+        // Authorised by ClearancePolicy@downloadCertificate + explicit ownership check (belt + braces).
         if ($clearance->user_id !== Auth::id()) {
             abort(403);
         }

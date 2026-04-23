@@ -30,7 +30,8 @@ class ApprovalController extends Controller
 
     public function show(ClearanceApproval $approval)
     {
-        // Ensure officer can only view approvals from their department
+        $this->authorize('view', $approval);
+        // Authorised by ApprovalPolicy@view + explicit department check (belt + braces).
         if ($approval->department_id !== Auth::user()->department_id) {
             abort(403);
         }
@@ -42,7 +43,8 @@ class ApprovalController extends Controller
 
     public function approve(Request $request, ClearanceApproval $approval)
     {
-        // Ensure officer can only approve for their department
+        $this->authorize('decide', $approval);
+        // Authorised by ApprovalPolicy@decide + explicit department check (belt + braces).
         if ($approval->department_id !== Auth::user()->department_id) {
             abort(403);
         }
@@ -73,7 +75,8 @@ class ApprovalController extends Controller
 
     public function reject(Request $request, ClearanceApproval $approval)
     {
-        // Ensure officer can only reject for their department
+        $this->authorize('decide', $approval);
+        // Authorised by ApprovalPolicy@decide + explicit department check (belt + braces).
         if ($approval->department_id !== Auth::user()->department_id) {
             abort(403);
         }

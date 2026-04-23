@@ -10,17 +10,20 @@ class DepartmentController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Department::class);
         $departments = Department::withCount(['approvals', 'officers'])->orderBy('priority')->get();
         return view('admin.departments.index', compact('departments'));
     }
 
     public function create()
     {
+        $this->authorize('create', Department::class);
         return view('admin.departments.create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Department::class);
         $request->validate([
             'name'        => 'required|string|max:255',
             'code'        => 'required|string|max:10|unique:departments,code',
@@ -42,11 +45,13 @@ class DepartmentController extends Controller
 
     public function edit(Department $department)
     {
+        $this->authorize('update', $department);
         return view('admin.departments.edit', compact('department'));
     }
 
     public function update(Request $request, Department $department)
     {
+        $this->authorize('update', $department);
         $request->validate([
             'name'        => 'required|string|max:255',
             'code'        => 'required|string|max:10|unique:departments,code,' . $department->id,
@@ -69,6 +74,7 @@ class DepartmentController extends Controller
 
     public function destroy(Department $department)
     {
+        $this->authorize('delete', $department);
         $department->delete();
         return redirect()->route('admin.departments.index')
             ->with('success', 'Department deleted.');

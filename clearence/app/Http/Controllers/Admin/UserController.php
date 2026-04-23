@@ -13,18 +13,21 @@ class UserController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', User::class);
         $users = User::with('department')->latest()->paginate(15);
         return view('admin.users.index', compact('users'));
     }
 
     public function create()
     {
+        $this->authorize('create', User::class);
         $departments = Department::all();
         return view('admin.users.create', compact('departments'));
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', User::class);
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -52,6 +55,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        $this->authorize('view', $user);
         $user->load('department');
         $clearances = null;
         if ($user->isStudent()) {
@@ -62,12 +66,14 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorize('update', $user);
         $departments = Department::all();
         return view('admin.users.edit', compact('user', 'departments'));
     }
 
     public function update(Request $request, User $user)
     {
+        $this->authorize('update', $user);
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
@@ -83,6 +89,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
         $user->delete();
         return redirect()->route('admin.users.index')
             ->with('success', 'User deleted successfully!');

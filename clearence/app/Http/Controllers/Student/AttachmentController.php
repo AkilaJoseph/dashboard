@@ -20,6 +20,8 @@ class AttachmentController extends Controller
      */
     public function download(Request $request, Attachment $attachment): StreamedResponse
     {
+        $this->authorize('download', $attachment);
+        // Authorised by AttachmentPolicy@download + explicit ownership check (belt + braces).
         $clearance = $attachment->clearance;
         $user      = $request->user();
 

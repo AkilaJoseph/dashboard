@@ -47,6 +47,7 @@ class ClearanceController extends Controller
 
     public function show(Clearance $clearance)
     {
+        $this->authorize('adminView', $clearance);
         $clearance->load('user', 'approvals.department', 'approvals.officer');
         $departments = Department::where('is_active', true)->orderBy('priority')->get();
 
@@ -55,6 +56,7 @@ class ClearanceController extends Controller
 
     public function override(Request $request, Clearance $clearance, ClearanceApproval $approval)
     {
+        $this->authorize('override', $clearance);
         // Ensure the approval belongs to this clearance
         if ($approval->clearance_id !== $clearance->id) {
             abort(403);
