@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'MUST Clearance') — MUST CMS</title>
     <link rel="manifest" href="/manifest.json">
-    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#064e3b">
     <meta name="application-name" content="ACIMS">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -500,6 +499,14 @@
                 </div>
 
                 @auth
+                <!-- ── Push Notifications Toggle ── -->
+                <button class="tb-btn" id="push-toggle-btn" title="Enable push notifications" aria-label="Enable push notifications" style="display:none;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </button>
+
                 <!-- ── Notification Bell ── -->
                 <div style="position:relative;" id="notif-wrap">
                     <button class="tb-btn" id="notif-btn" onclick="toggleDropdown('notif-dd')" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
@@ -685,28 +692,86 @@ updateBadge();
 setInterval(updateBadge, 30000);
 @endauth
 
-// ── PWA: Register Service Worker ──
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => {
-                console.log('SW registered');
+// ── PWA: Push Notification Opt-In ────────────────────────────────────────────
+// SW registration is handled by register-sw.js (imported via app.js).
+// This block wires the push-toggle button and subscribes the endpoint.
+@auth
+(function () {
+    var vapidKey = (document.querySelector('meta[name="vapid-public-key"]') || {}).content;
+    if (!vapidKey || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-                // Request notification permission
-                if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission();
-                }
+    var btn = document.getElementById('push-toggle-btn');
+    if (!btn) return;
 
-                // Poll SW for notifications every 30s
-                setInterval(() => {
-                    if (reg.active) {
-                        reg.active.postMessage({ type: 'POLL_NOTIFICATIONS' });
-                    }
-                }, 30000);
-            })
-            .catch(err => console.warn('SW failed:', err));
+    // Show button — it is hidden until we know push is available
+    btn.style.display = 'flex';
+
+    function markSubscribed() {
+        btn.style.color = '#059669';
+        btn.title = 'Push notifications are on';
+    }
+
+    // Reflect current state on page load
+    navigator.serviceWorker.ready.then(function (reg) {
+        reg.pushManager.getSubscription().then(function (sub) {
+            if (sub) markSubscribed();
+        });
     });
-}
+
+    btn.addEventListener('click', async function () {
+        if (Notification.permission === 'denied') {
+            alert('Notifications are blocked in your browser. Please allow them in site settings.');
+            return;
+        }
+
+        var perm = Notification.permission === 'granted'
+            ? 'granted'
+            : await Notification.requestPermission();
+
+        if (perm !== 'granted') return;
+
+        var reg = await navigator.serviceWorker.ready;
+
+        // Re-use existing subscription if present
+        var sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+            sub = await reg.pushManager.subscribe({
+                userVisibleOnly:      true,
+                applicationServerKey: urlB64ToUint8Array(vapidKey),
+            });
+        }
+
+        await fetch('/api/v1/push/subscribe', {
+            method:      'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN':  (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+                'Accept':        'application/json',
+            },
+            body: JSON.stringify({
+                endpoint:   sub.endpoint,
+                p256dh_key: bufToB64(sub.getKey('p256dh')),
+                auth_key:   bufToB64(sub.getKey('auth')),
+                user_agent: navigator.userAgent,
+            }),
+        }).then(function (r) {
+            if (r.ok) markSubscribed();
+        }).catch(function () {});
+    });
+
+    function urlB64ToUint8Array(b64) {
+        var pad = '='.repeat((4 - b64.length % 4) % 4);
+        var raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+        return Uint8Array.from(Array.from(raw).map(function (c) { return c.charCodeAt(0); }));
+    }
+    function bufToB64(buf) {
+        if (!buf) return '';
+        return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)))
+            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+})();
+@endauth
 </script>
 </body>
 </html>
