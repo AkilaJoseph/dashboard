@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Department;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,27 +11,30 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create Admin
+        // Admin
         User::create([
-            'name'     => 'System Administrator',
-            'email'    => 'admin@must.ac.tz',
-            'password' => Hash::make('password'),
-            'role'     => 'admin',
+            'name'      => 'System Administrator',
+            'email'     => 'admin@must.ac.tz',
+            'password'  => Hash::make('password'),
+            'role'      => 'admin',
             'is_active' => true,
         ]);
 
-        // Create Officers for each department
-        $departments = Department::all();
+        // One officer per department — mapped by department code
         $officerData = [
-            'FIN'  => ['name' => 'Amina Kibona', 'email' => 'fin@must.ac.tz'],
-            'LIB'  => ['name' => 'Emmanuel Ngowi', 'email' => 'lib@must.ac.tz'],
-            'HOST' => ['name' => 'Grace Mwamburi', 'email' => 'host@must.ac.tz'],
-            'DEPT' => ['name' => 'Dr. Daniel Sinkonde', 'email' => 'dept@must.ac.tz'],
-            'SPT'  => ['name' => 'James Mlowe', 'email' => 'spt@must.ac.tz'],
-            'REG'  => ['name' => 'Fatuma Ally', 'email' => 'reg@must.ac.tz'],
+            'MUSTSO' => ['name' => 'Baraka Msangi',       'email' => 'mustso@must.ac.tz'],
+            'LIB'    => ['name' => 'Emmanuel Ngowi',       'email' => 'lib@must.ac.tz'],
+            'WKSHP'  => ['name' => 'Josephine Mwakasege',  'email' => 'wkshp@must.ac.tz'],
+            'LAB'    => ['name' => 'Dr. Rashid Kilindoni', 'email' => 'lab@must.ac.tz'],
+            'HOD'    => ['name' => 'Dr. Daniel Sinkonde',  'email' => 'hod@must.ac.tz'],
+            'CAT'    => ['name' => 'Grace Mwamburi',       'email' => 'cat@must.ac.tz'],
+            'SPT'    => ['name' => 'James Mlowe',          'email' => 'spt@must.ac.tz'],
+            'HOST'   => ['name' => 'Amina Kibona',         'email' => 'host@must.ac.tz'],
+            'HSG'    => ['name' => 'Rehema Chiwanga',      'email' => 'hsg@must.ac.tz'],
+            'FIN'    => ['name' => 'Fatuma Ally',          'email' => 'fin@must.ac.tz'],
         ];
 
-        foreach ($departments as $dept) {
+        foreach (Department::all() as $dept) {
             $data = $officerData[$dept->code] ?? [
                 'name'  => $dept->name . ' Officer',
                 'email' => strtolower($dept->code) . '@must.ac.tz',
@@ -47,7 +49,7 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Create sample students reflecting MUST context
+        // Sample students — mix of degree and diploma to demonstrate Catering rule
         $students = [
             [
                 'name'                => 'Daudi Kasimu Juma',
@@ -64,9 +66,9 @@ class UserSeeder extends Seeder
                 'email'               => 'student2@must.ac.tz',
                 'student_id'          => 'UE/BCOM/25/11203',
                 'registration_number' => '22100934340021',
-                'programme'           => 'B.Sc in Computer Science',
+                'programme'           => 'Diploma in Computer Science',
                 'college'             => 'College of Information and Communication Technology',
-                'year_of_study'       => 'Year 4',
+                'year_of_study'       => 'Year 2',
                 'phone'               => '+255712000002',
             ],
             [
@@ -84,9 +86,9 @@ class UserSeeder extends Seeder
                 'email'               => 'student4@must.ac.tz',
                 'student_id'          => 'UE/BEM/25/10789',
                 'registration_number' => '22100934340044',
-                'programme'           => 'B.Eng in Electrical and Mechanical Engineering',
+                'programme'           => 'Diploma in Electrical Engineering',
                 'college'             => 'College of Engineering and Technology',
-                'year_of_study'       => 'Year 3',
+                'year_of_study'       => 'Year 2',
                 'phone'               => '+255712000004',
             ],
             [

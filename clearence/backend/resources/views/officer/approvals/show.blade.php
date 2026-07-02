@@ -75,10 +75,13 @@
     <!-- All Departments Progress -->
     <div class="glow-card" style="margin-bottom:18px;">
         <p style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#059669;margin-bottom:14px;">Clearance Progress — All Departments</p>
-        @foreach($approval->clearance->approvals->sortBy('department.priority') as $a)
-        <div class="dept-prog-row"
-             style="border-color:{{ $a->id===$approval->id ? '#fde68a' : ($a->status==='approved' ? '#a7f3d0' : ($a->status==='rejected' ? '#fecaca' : '#e2e8f0')) }};
-                    background:{{ $a->id===$approval->id ? '#fefce8' : ($a->status==='approved' ? '#f0fdf4' : ($a->status==='rejected' ? '#fef2f2' : '#f8fafc')) }};">
+        @foreach($approval->clearance->approvals->sortBy('department.priority') as $i => $a)
+        @php
+            $isWaiting = $a->status === 'waiting';
+            $borderColor = $a->id===$approval->id ? '#fde68a' : ($a->status==='approved' ? '#a7f3d0' : ($a->status==='rejected' ? '#fecaca' : ($isWaiting ? '#e2e8f0' : '#fed7aa')));
+            $bgColor     = $a->id===$approval->id ? '#fefce8' : ($a->status==='approved' ? '#f0fdf4' : ($a->status==='rejected' ? '#fef2f2' : ($isWaiting ? '#f8fafc' : '#fff7ed')));
+        @endphp
+        <div class="dept-prog-row" style="border-color:{{ $borderColor }};background:{{ $bgColor }};{{ $isWaiting ? 'opacity:0.65;' : '' }}">
             <div style="display:flex;align-items:center;gap:10px;">
                 @if($a->status==='approved')
                 <div style="width:18px;height:18px;border-radius:50%;background:#059669;display:flex;align-items:center;justify-content:center;">
@@ -88,15 +91,28 @@
                 <div style="width:18px;height:18px;border-radius:50%;background:#ef4444;display:flex;align-items:center;justify-content:center;">
                     <svg style="width:10px;height:10px;color:#fff;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
                 </div>
+                @elseif($isWaiting)
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid #cbd5e1;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                    <svg style="width:9px;height:9px;color:#94a3b8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
                 @else
-                <div style="width:18px;height:18px;border-radius:50%;border:2px solid #cbd5e1;"></div>
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid #f59e0b;background:#fef3c7;display:flex;align-items:center;justify-content:center;">
+                    <span style="font-size:8px;font-weight:800;color:#92400e;">{{ $i+1 }}</span>
+                </div>
                 @endif
-                <span style="font-size:12px;font-weight:{{ $a->id===$approval->id ? '700' : '500' }};color:#1e293b;">{{ $a->department->name }}</span>
+                <span style="font-size:12px;font-weight:{{ $a->id===$approval->id ? '700' : '500' }};color:{{ $isWaiting ? '#94a3b8' : '#1e293b' }};">
+                    {{ $i+1 }}. {{ $a->department->name }}
+                </span>
                 @if($a->id === $approval->id)
                 <span style="font-size:10px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:1px 8px;border-radius:999px;font-weight:700;">YOUR DEPT</span>
                 @endif
+                @if($isWaiting)
+                <span style="font-size:10px;background:#f1f5f9;border:1px solid #e2e8f0;color:#94a3b8;padding:1px 8px;border-radius:999px;font-weight:600;">Locked</span>
+                @endif
             </div>
-            <span style="font-size:12px;font-weight:600;color:{{ $a->status==='approved' ? '#059669' : ($a->status==='rejected' ? '#ef4444' : '#d97706') }};">{{ ucfirst($a->status) }}</span>
+            <span style="font-size:12px;font-weight:600;color:{{ $a->status==='approved' ? '#059669' : ($a->status==='rejected' ? '#ef4444' : ($isWaiting ? '#94a3b8' : '#d97706')) }};">
+                {{ $isWaiting ? 'Waiting' : ucfirst($a->status) }}
+            </span>
         </div>
         @endforeach
     </div>
@@ -105,7 +121,19 @@
     @include('partials.attachments-list', ['attachments' => $approval->clearance->attachments])
 
     <!-- Decision Panel -->
-    @if($approval->status === 'pending')
+    @if($approval->isWaiting())
+    <div class="glow-card" style="margin-bottom:18px;border:1.5px solid #e2e8f0;background:#f8fafc;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#f1f5f9;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg style="width:16px;height:16px;color:#94a3b8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+                <p style="font-size:13px;font-weight:700;color:#64748b;margin:0;">This step is locked</p>
+                <p style="font-size:11px;color:#94a3b8;margin:3px 0 0;">A previous department has not yet approved this student. Your department will be unlocked automatically once the preceding step is completed.</p>
+            </div>
+        </div>
+    </div>
+    @elseif($approval->status === 'pending')
     <div id="officer-offline-status" style="display:none;"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
         <!-- Approve -->
@@ -121,7 +149,20 @@
                 <div style="margin-bottom:13px;">
                     <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#065f46;margin-bottom:6px;">Comments (Optional)</label>
                     <textarea name="comments" rows="3" class="glow-input" style="resize:none;"
-                              placeholder="e.g., All books returned. No outstanding dues."></textarea>
+                              placeholder="e.g., All books returned. No outstanding dues.">{{ old('comments') }}</textarea>
+                </div>
+                <div style="margin-bottom:13px;">
+                    <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#065f46;margin-bottom:6px;">
+                        Department PIN <span style="color:#ef4444;">*</span>
+                        <span style="font-size:10px;font-weight:500;text-transform:none;color:#64748b;"> — required to confirm your identity</span>
+                    </label>
+                    <input type="password" name="department_pin" required autocomplete="off"
+                           class="glow-input {{ $errors->has('department_pin') ? 'border-red-400' : '' }}"
+                           placeholder="Enter your department PIN"
+                           style="{{ $errors->has('department_pin') ? 'border-color:#fca5a5;' : '' }}">
+                    @error('department_pin')
+                    <p style="font-size:11px;color:#ef4444;margin-top:5px;">{{ $message }}</p>
+                    @enderror
                 </div>
                 <button type="submit" class="btn-glow" style="width:100%;justify-content:center;">Approve</button>
             </form>
@@ -140,7 +181,20 @@
                 <div style="margin-bottom:13px;">
                     <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:6px;">Rejection Reason <span style="color:#ef4444;">*</span></label>
                     <textarea name="comments" rows="3" required class="glow-input" style="resize:none;border-color:#fecaca;"
-                              placeholder="e.g., Outstanding library fines of TZS 5,000. Unreturned book: Applied Mathematics Vol.2"></textarea>
+                              placeholder="e.g., Outstanding library fines of TZS 5,000. Unreturned book: Applied Mathematics Vol.2">{{ old('comments') }}</textarea>
+                </div>
+                <div style="margin-bottom:13px;">
+                    <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#991b1b;margin-bottom:6px;">
+                        Department PIN <span style="color:#ef4444;">*</span>
+                        <span style="font-size:10px;font-weight:500;text-transform:none;color:#64748b;"> — required to confirm your identity</span>
+                    </label>
+                    <input type="password" name="department_pin" required autocomplete="off"
+                           class="glow-input"
+                           placeholder="Enter your department PIN"
+                           style="border-color:#fecaca;">
+                    @error('department_pin')
+                    <p style="font-size:11px;color:#ef4444;margin-top:5px;">{{ $message }}</p>
+                    @enderror
                 </div>
                 <button type="submit"
                         style="width:100%;padding:10px;border:none;border-radius:8px;cursor:pointer;background:#ef4444;color:#fff;font-weight:700;font-size:13px;font-family:inherit;transition:background 0.2s;"

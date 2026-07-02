@@ -7,6 +7,8 @@
 @php
     $approved = $clearance->approvals->where('status','approved')->count();
     $rejected = $clearance->approvals->where('status','rejected')->count();
+    $pending  = $clearance->approvals->where('status','pending')->count();
+    $waiting  = $clearance->approvals->where('status','waiting')->count();
     $total    = $clearance->approvals->count();
     $pct      = $total > 0 ? round(($approved/$total)*100) : 0;
     $user     = $clearance->user;
@@ -37,7 +39,8 @@
 .dept-row:hover { transform:translateX(4px); box-shadow:0 4px 16px rgba(0,0,0,0.06); }
 .dept-approved { border-color:#a7f3d0; background:linear-gradient(135deg,#f0fdf4,#ecfdf5); }
 .dept-rejected { border-color:#fecaca; background:linear-gradient(135deg,#fef2f2,#fff1f1); }
-.dept-pending  { border-color:#e2e8f0; background:linear-gradient(135deg,#f8fafc,#f1f5f9); }
+.dept-pending  { border-color:#fed7aa; background:linear-gradient(135deg,#fff7ed,#fffbeb); }
+.dept-waiting  { border-color:#e2e8f0; background:linear-gradient(135deg,#f8fafc,#f1f5f9); opacity:0.7; }
 
 .dept-icon {
     width:38px; height:38px; border-radius:50%;
@@ -47,7 +50,8 @@
 .dept-row:hover .dept-icon { transform:scale(1.1); }
 .icon-approved { background:linear-gradient(135deg,#059669,#10b981); box-shadow:0 3px 10px rgba(5,150,105,0.3); }
 .icon-rejected { background:linear-gradient(135deg,#ef4444,#f87171); box-shadow:0 3px 10px rgba(239,68,68,0.3); }
-.icon-pending  { background:#f1f5f9; border:1.5px solid #cbd5e1; }
+.icon-pending  { background:linear-gradient(135deg,#f59e0b,#fbbf24); box-shadow:0 3px 10px rgba(245,158,11,0.25); }
+.icon-waiting  { background:#f1f5f9; border:1.5px solid #cbd5e1; }
 
 .pending-pulse {
     width:9px; height:9px; border-radius:50%; background:#d97706;
@@ -183,9 +187,13 @@
                 <span style="font-size:22px;font-weight:800;color:#059669;" id="count-approved">0</span>
                 <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Approved</span>
             </div>
-            <div class="stat-pill" style="background:#fef9c3;border-right:1px solid #f1f5f9;">
+            <div class="stat-pill" style="background:#fff7ed;border-right:1px solid #f1f5f9;">
                 <span style="font-size:22px;font-weight:800;color:#d97706;" id="count-pending">0</span>
-                <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Pending</span>
+                <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">In Review</span>
+            </div>
+            <div class="stat-pill" style="background:#f8fafc;border-right:1px solid #f1f5f9;">
+                <span style="font-size:22px;font-weight:800;color:#94a3b8;" id="count-waiting">0</span>
+                <span style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-top:2px;">Locked</span>
             </div>
             <div class="stat-pill" style="background:#fef2f2;">
                 <span style="font-size:22px;font-weight:800;color:#ef4444;" id="count-rejected">0</span>
@@ -243,28 +251,52 @@
         </div>
 
         @foreach($clearance->approvals->sortBy('department.priority') as $i => $approval)
-        @php $delay = 0.05 * ($i+1); @endphp
-        <div class="dept-row dept-item {{ $approval->status==='approved' ? 'dept-approved' : ($approval->status==='rejected' ? 'dept-rejected' : 'dept-pending') }}"
-             style="animation-delay:{{ $delay }}s;">
-            <div class="dept-icon {{ $approval->status==='approved' ? 'icon-approved' : ($approval->status==='rejected' ? 'icon-rejected' : 'icon-pending') }}">
+        @php
+            $delay      = 0.05 * ($i+1);
+            $isWaiting  = $approval->status === 'waiting';
+            $rowClass   = match($approval->status) {
+                'approved' => 'dept-approved',
+                'rejected' => 'dept-rejected',
+                'pending'  => 'dept-pending',
+                default    => 'dept-waiting',
+            };
+            $iconClass  = match($approval->status) {
+                'approved' => 'icon-approved',
+                'rejected' => 'icon-rejected',
+                'pending'  => 'icon-pending',
+                default    => 'icon-waiting',
+            };
+        @endphp
+        <div class="dept-row dept-item {{ $rowClass }}" style="animation-delay:{{ $delay }}s;">
+            <div class="dept-icon {{ $iconClass }}">
                 @if($approval->status==='approved')
                 <svg style="width:16px;height:16px;color:#fff;animation:checkPop 0.4s ease {{ $delay }}s both;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                 @elseif($approval->status==='rejected')
                 <svg style="width:16px;height:16px;color:#fff;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                @elseif($isWaiting)
+                <svg style="width:14px;height:14px;color:#94a3b8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 @else
-                <span style="font-size:11px;font-weight:700;color:#64748b;">{{ $i+1 }}</span>
+                <span style="font-size:11px;font-weight:800;color:#fff;">{{ $i+1 }}</span>
                 @endif
             </div>
 
             <div style="flex:1;min-width:0;">
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:3px;">
-                    <p style="font-size:13px;font-weight:700;color:#1e293b;margin:0;">{{ $approval->department->name }}</p>
+                    <p style="font-size:13px;font-weight:700;color:{{ $isWaiting ? '#94a3b8' : '#1e293b' }};margin:0;">
+                        <span style="font-size:10px;font-weight:600;color:#94a3b8;margin-right:4px;">Step {{ $i+1 }}</span>
+                        {{ $approval->department->name }}
+                    </p>
                     @if($approval->status==='approved')
                     <span class="badge badge-approved">✓ Approved</span>
                     @elseif($approval->status==='rejected')
                     <span class="badge badge-rejected">✗ Rejected</span>
+                    @elseif($isWaiting)
+                    <span style="font-size:10px;font-weight:600;color:#94a3b8;background:#f1f5f9;border:1px solid #e2e8f0;padding:2px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;">
+                        <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Locked
+                    </span>
                     @else
-                    <span class="badge badge-pending"><span class="pending-pulse"></span>Pending</span>
+                    <span class="badge badge-pending"><span class="pending-pulse"></span>In Review</span>
                     @endif
                 </div>
                 @if($approval->officer)
@@ -282,6 +314,11 @@
                 <p style="font-size:11px;color:#d97706;margin:6px 0 0;display:flex;align-items:center;gap:5px;">
                     <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                     Awaiting review from this department...
+                </p>
+                @elseif($isWaiting)
+                <p style="font-size:11px;color:#94a3b8;margin:6px 0 0;display:flex;align-items:center;gap:5px;">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Will unlock once the previous department approves
                 </p>
                 @endif
             </div>
@@ -480,7 +517,8 @@ function animateCount(id, target) {
 }
 document.addEventListener('DOMContentLoaded', () => {
     animateCount('count-approved', {{ $approved }});
-    animateCount('count-pending',  {{ $total - $approved - $rejected }});
+    animateCount('count-pending',  {{ $pending }});
+    animateCount('count-waiting',  {{ $waiting }});
     animateCount('count-rejected', {{ $rejected }});
 });
 

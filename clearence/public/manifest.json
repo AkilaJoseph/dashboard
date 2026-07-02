@@ -1,32 +1,73 @@
 {
-    "name": "MUST Clearance Management System",
-    "short_name": "MUST CMS",
-    "description": "Mbeya University of Science and Technology — Student Clearance System",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#064e3b",
-    "theme_color": "#064e3b",
-    "orientation": "portrait-primary",
-    "icons": [
-        {
-            "src": "/images/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/images/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ],
-    "categories": ["education", "productivity"],
-    "shortcuts": [
-        {
-            "name": "My Clearances",
-            "url": "/student/clearances",
-            "description": "View clearance status"
-        }
-    ]
+  "name": "MUST Clearance System",
+  "short_name": "ACIMS",
+  "description": "MUST Automated Clearance Information Management System — manage and track student departmental clearances at Mbeya University of Science and Technology.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#064e3b",
+  "background_color": "#f1f5f9",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "/images/pwa-icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/pwa-icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/pwa-icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "My Clearances",
+      "short_name": "Clearances",
+      "description": "View your clearance requests",
+      "url": "/student/clearances",
+      "icons": [{ "src": "/images/pwa-icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
 }

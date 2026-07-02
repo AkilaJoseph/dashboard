@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class DepartmentController extends Controller
 {
@@ -78,5 +79,20 @@ class DepartmentController extends Controller
         $department->delete();
         return redirect()->route('admin.departments.index')
             ->with('success', 'Department deleted.');
+    }
+
+    // Admin resets the PIN for a department. Officers must use the new PIN immediately.
+    public function resetPin(Request $request, Department $department)
+    {
+        $this->authorize('update', $department);
+        $request->validate([
+            'new_pin'     => 'required|string|min:4|max:20|confirmed',
+            'new_pin_confirmation' => 'required|string',
+        ]);
+
+        $department->update(['access_pin' => Hash::make($request->new_pin)]);
+
+        return redirect()->route('admin.departments.index')
+            ->with('success', "PIN reset for {$department->name}. Inform the officer immediately.");
     }
 }

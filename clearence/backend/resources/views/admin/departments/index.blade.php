@@ -57,10 +57,13 @@
                     {{ $dept->is_active ? 'Active' : 'Inactive' }}
                 </span>
             </div>
-            <div style="display:flex;align-items:center;gap:7px;">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
                 <a href="{{ route('admin.departments.edit', $dept) }}"
                    style="font-size:11px;font-weight:600;color:#059669;text-decoration:none;border:1px solid #a7f3d0;background:#f0fdf4;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
                    onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0fdf4'">Edit</a>
+                <button onclick="openPinModal({{ $dept->id }}, '{{ addslashes($dept->name) }}')"
+                        style="font-size:11px;font-weight:600;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all 0.15s;"
+                        onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">PIN</button>
                 <form action="{{ route('admin.departments.destroy', $dept) }}" method="POST" style="display:inline;"
                       onsubmit="return confirm('Delete {{ $dept->name }}?')">
                     @csrf @method('DELETE')
@@ -77,4 +80,56 @@
         @endforelse
     </div>
 </div>
+{{-- PIN Reset Modal --}}
+<div id="pinModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div style="background:#fff;border-radius:14px;width:100%;max-width:420px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <p style="font-size:14px;font-weight:700;color:#fff;margin:0;">Reset Department PIN</p>
+                <p id="pinModalName" style="font-size:11px;color:rgba(221,214,254,0.8);margin:2px 0 0;"></p>
+            </div>
+            <button onclick="closePinModal()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:16px;">&times;</button>
+        </div>
+        <form id="pinForm" method="POST" style="padding:20px;">
+            @csrf
+            <p style="font-size:11px;color:#64748b;margin-bottom:16px;">The new PIN will take effect immediately. Inform the department officer after resetting.</p>
+            <div style="margin-bottom:13px;">
+                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#4c1d95;margin-bottom:6px;">New PIN</label>
+                <input type="password" name="new_pin" required minlength="4" class="glow-input" placeholder="Enter new PIN (min 4 characters)" autocomplete="new-password">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#4c1d95;margin-bottom:6px;">Confirm PIN</label>
+                <input type="password" name="new_pin_confirmation" required minlength="4" class="glow-input" placeholder="Repeat the new PIN" autocomplete="new-password">
+            </div>
+            @if(session('success'))
+            <p style="font-size:11px;color:#059669;margin-bottom:10px;">{{ session('success') }}</p>
+            @endif
+            @if($errors->has('new_pin'))
+            <p style="font-size:11px;color:#ef4444;margin-bottom:10px;">{{ $errors->first('new_pin') }}</p>
+            @endif
+            <button type="submit" style="width:100%;padding:10px;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Reset PIN</button>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function openPinModal(deptId, deptName) {
+    const base = "{{ url('admin/departments') }}/";
+    document.getElementById('pinForm').action = base + deptId + '/reset-pin';
+    document.getElementById('pinModalName').textContent = deptName;
+    const m = document.getElementById('pinModal');
+    m.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closePinModal() {
+    document.getElementById('pinModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+document.getElementById('pinModal').addEventListener('click', function(e) {
+    if (e.target === this) closePinModal();
+});
+</script>
+@endpush
+
 @endsection

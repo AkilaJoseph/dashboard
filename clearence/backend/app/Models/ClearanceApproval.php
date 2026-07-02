@@ -9,6 +9,11 @@ class ClearanceApproval extends Model
 {
     use HasAuditLog;
 
+    // Status values:
+    //   waiting  — locked; a previous department has not yet approved
+    //   pending  — unlocked and awaiting officer action
+    //   approved — cleared by officer
+    //   rejected — blocked by officer
     protected $fillable = [
         'clearance_id',
         'department_id',
@@ -17,6 +22,11 @@ class ClearanceApproval extends Model
         'comments',
         'reviewed_at',
     ];
+
+    public function isWaiting(): bool  { return $this->status === 'waiting'; }
+    public function isPending(): bool  { return $this->status === 'pending'; }
+    public function isApproved(): bool { return $this->status === 'approved'; }
+    public function isRejected(): bool { return $this->status === 'rejected'; }
 
     protected function casts(): array
     {

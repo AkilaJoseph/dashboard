@@ -15,6 +15,7 @@ class Department extends Model
         'description',
         'is_active',
         'priority',
+        'access_pin',
     ];
 
     protected function casts(): array

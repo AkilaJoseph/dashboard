@@ -89,6 +89,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
     Route::resource('users', UserController::class);
     Route::resource('departments', DepartmentController::class);
+    Route::post('/departments/{department}/reset-pin', [DepartmentController::class, 'resetPin'])->name('departments.reset-pin');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     // Clearance management
     Route::get('/clearances', [AdminClearanceController::class, 'index'])->name('clearances.index');

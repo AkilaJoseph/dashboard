@@ -52,24 +52,27 @@ class Clearance extends Model
     }
 
     // Helper methods
-    public function isFullyApproved()
+
+    // True only when every approval in this clearance is 'approved' (none waiting/pending/rejected).
+    public function isFullyApproved(): bool
     {
-        return $this->approvals()->where('status', 'approved')->count() === Department::where('is_active', true)->count();
+        return $this->approvals()->whereIn('status', ['pending', 'waiting', 'rejected'])->doesntExist();
     }
 
-    public function hasRejection()
+    public function hasRejection(): bool
     {
         return $this->approvals()->where('status', 'rejected')->exists();
     }
 
-    public function updateOverallStatus()
+    public function updateOverallStatus(): void
     {
         if ($this->hasRejection()) {
             $this->status = 'rejected';
         } elseif ($this->isFullyApproved()) {
             $this->status = 'approved';
             $this->completed_at = now();
-        } elseif ($this->approvals()->where('status', '!=', 'pending')->exists()) {
+        } elseif ($this->approvals()->where('status', 'approved')->exists()) {
+            // At least one dept has approved — clearance is progressing through the sequence
             $this->status = 'in_progress';
         } else {
             $this->status = 'pending';

@@ -52,13 +52,22 @@ class ClearanceController extends Controller
                 'reference_no' => 'CLR/' . now()->year . '/' . str_pad($clearance->id, 6, '0', STR_PAD_LEFT),
             ]);
 
-            // Seed one approval row per active department.
-            $departments = Department::where('is_active', true)->get();
-            foreach ($departments as $department) {
+            // Build the sequential approval chain.
+            // Departments are processed in priority order (ascending).
+            // Catering (code=CAT) is only included for diploma students.
+            $isDiploma   = str_contains(strtolower(Auth::user()->programme ?? ''), 'diploma');
+            $departments = Department::where('is_active', true)
+                ->orderBy('priority')
+                ->get()
+                ->filter(fn ($d) => !($d->code === 'CAT' && !$isDiploma))
+                ->values();
+
+            foreach ($departments as $index => $department) {
                 ClearanceApproval::create([
                     'clearance_id'  => $clearance->id,
                     'department_id' => $department->id,
-                    'status'        => 'pending',
+                    // Only the first department is unlocked; the rest are locked until their predecessor approves.
+                    'status'        => $index === 0 ? 'pending' : 'waiting',
                 ]);
             }
 
