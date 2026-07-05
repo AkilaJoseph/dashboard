@@ -7,7 +7,7 @@
 @section('content')
 <style>
 .dept-row{
-    display:grid;grid-template-columns:50px 1.5fr 80px 1.5fr 60px 80px 90px;
+    display:grid;grid-template-columns:50px 1.5fr 80px 1.5fr 60px 80px 175px;
     align-items:center;gap:10px;padding:13px 18px;border-radius:9px;
     border:1px solid #e2e8f0;background:#fff;
     transition:all 0.15s;margin-bottom:6px;
@@ -57,7 +57,7 @@
                     {{ $dept->is_active ? 'Active' : 'Inactive' }}
                 </span>
             </div>
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
                 <a href="{{ route('admin.departments.edit', $dept) }}"
                    style="font-size:11px;font-weight:600;color:#059669;text-decoration:none;border:1px solid #a7f3d0;background:#f0fdf4;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
                    onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0fdf4'">Edit</a>

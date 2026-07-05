@@ -7,7 +7,7 @@
 @section('content')
 <style>
 .user-row{
-    display:grid;grid-template-columns:2fr 1.5fr 90px 1.2fr 80px 100px;
+    display:grid;grid-template-columns:2fr 1.5fr 90px 1.2fr 80px 155px;
     align-items:center;gap:10px;padding:13px 18px;border-radius:9px;
     border:1px solid #e2e8f0;background:#fff;
     transition:all 0.15s;margin-bottom:6px;
@@ -79,7 +79,7 @@
                 </span>
             </div>
 
-            <div style="display:flex;align-items:center;gap:7px;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
                 <a href="{{ route('admin.users.show', $user) }}"
                    style="font-size:11px;font-weight:600;color:#3b82f6;text-decoration:none;border:1px solid #bfdbfe;background:#eff6ff;padding:4px 10px;border-radius:6px;transition:all 0.15s;"
                    onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">View</a>
